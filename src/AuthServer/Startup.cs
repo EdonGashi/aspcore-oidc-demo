@@ -12,12 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.Data;
 using AuthServer.Infrastructure;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Core;
 using Swashbuckle.AspNetCore.Swagger;
+using Utils.Authorization;
 using Utils.Documentation;
 
 namespace AuthServer
@@ -37,18 +39,31 @@ namespace AuthServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
+            ConfigureServicesDatabase(services);
+            ConfigureServicesMvc(services);
+            ConfigureServicesAuth(services);
+            ConfigureServicesApiExplorer(services);
+            ConfigureServicesCookieConsent(services);
+        }
 
+        private void ConfigureServicesDatabase(IServiceCollection services)
+        {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
+        }
 
+        private static void ConfigureServicesMvc(IServiceCollection services)
+        {
+            services
+                .AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
+        }
+
+        private void ConfigureServicesAuth(IServiceCollection services)
+        {
             services
                 .AddDefaultIdentity<IdentityUser>(options =>
                 {
@@ -151,14 +166,24 @@ namespace AuthServer
                 };
             });
 
-            services
-                .AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddAuthorization();
+            services.AddImplicitScopePolicy();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
+        }
 
-            services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
+        private static void ConfigureServicesCookieConsent(IServiceCollection services)
+        {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+        }
 
-            #region Swagger
-
+        private static void ConfigureServicesApiExplorer(IServiceCollection services)
+        {
             services.AddMvcCore().AddVersionedApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
@@ -176,7 +201,7 @@ namespace AuthServer
             {
                 var security = new Dictionary<string, IEnumerable<string>>
                 {
-                    {"Bearer", new string[] { }},
+                    { "Bearer", new string[] { } },
                 };
 
                 options.AddSecurityDefinition("Bearer", new ApiKeyScheme
@@ -210,8 +235,6 @@ namespace AuthServer
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
             });
-
-            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
