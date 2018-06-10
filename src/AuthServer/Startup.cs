@@ -65,7 +65,7 @@ namespace AuthServer
         private void ConfigureServicesAuth(IServiceCollection services)
         {
             services
-                .AddDefaultIdentity<IdentityUser>(options =>
+                .AddIdentity<IdentityUser, IdentityRole>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
                     options.Password.RequireLowercase = false;
@@ -79,7 +79,9 @@ namespace AuthServer
                     options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
                     options.Stores.MaxLengthForKeys = 128;
                 })
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
+                .AddDefaultTokenProviders();
 
             // Register the OpenIddict services.
             services.AddOpenIddict(options =>
