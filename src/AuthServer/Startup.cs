@@ -166,6 +166,20 @@ namespace AuthServer
                     context.Response.Redirect(context.RedirectUri);
                     return Task.CompletedTask;
                 };
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api") &&
+                        context.Response.StatusCode == StatusCodes.Status200OK)
+                    {
+                        context.Response.Clear();
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
             });
 
             services.AddAuthorization();
