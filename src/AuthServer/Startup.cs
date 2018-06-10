@@ -61,6 +61,19 @@ namespace AuthServer
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services
+                .AddAuthentication()
+                .AddCookie()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = "773091501856-uvv6htap67gve64j05dppf6kii6ues3m.apps.googleusercontent.com";
+                    options.ClientSecret = "DNcjBC9fgcY0zUqRe7PYYo1q";
+                    options.CallbackPath = "/connect/external/google";
+                    options.AccessType = "offline";
+                    options.SaveTokens = true;
+                })
+                .AddOAuthValidation();
+
+            services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
