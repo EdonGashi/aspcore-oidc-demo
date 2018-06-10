@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -43,7 +44,20 @@ namespace AuthServer
             });
 
             services
-                .AddDefaultIdentity<IdentityUser>()
+                .AddDefaultIdentity<IdentityUser>(options =>
+                {
+                    options.User.RequireUniqueEmail = true;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequiredUniqueChars = 1;
+                    options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
+                    options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                    options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+                    options.Stores.MaxLengthForKeys = 128;
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services
