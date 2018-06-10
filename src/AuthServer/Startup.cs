@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenIddict.Core;
 using Swashbuckle.AspNetCore.Swagger;
 using Utils.Documentation;
 
@@ -65,6 +66,61 @@ namespace AuthServer
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            // Register the OpenIddict services.
+            services.AddOpenIddict(options =>
+            {
+                // Register the Entity Framework stores.
+                options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
+
+                // Register the ASP.NET Core MVC binder used by OpenIddict.
+                // Note: if you don't call this method, you won't be able to
+                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                options.AddMvcBinders();
+
+                // Enable the authorization, logout, token and userinfo endpoints.
+                options
+                    .EnableAuthorizationEndpoint("/connect/authorize")
+                    .EnableLogoutEndpoint("/connect/logout")
+                    .EnableTokenEndpoint("/connect/token")
+                    .EnableUserinfoEndpoint("/api/v1/users/me");
+
+                // Mark the "email", "profile" and "roles" scopes as supported scopes.
+                options.RegisterScopes(
+                    OpenIdConnectConstants.Scopes.Email,
+                    OpenIdConnectConstants.Scopes.Profile,
+                    OpenIddictConstants.Scopes.Roles);
+
+                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                // can enable the other flows if you need to support implicit or client credentials.
+                options
+                    .AllowAuthorizationCodeFlow()
+                    .AllowPasswordFlow()
+                    .AllowImplicitFlow()
+                    .AllowRefreshTokenFlow();
+
+                // Make the "client_id" parameter mandatory when sending a token request.
+                options.RequireClientIdentification();
+
+                // When request caching is enabled, authorization and logout requests
+                // are stored in the distributed cache by OpenIddict and the user agent
+                // is redirected to the same page with a single parameter (request_id).
+                // This allows flowing large OpenID Connect requests even when using
+                // an external authentication provider like Google, Facebook or Twitter.
+                options.EnableRequestCaching();
+
+                // Enable scope validation, so that authorization and token requests
+                // that specify unregistered scopes are automatically rejected.
+                options.EnableScopeValidation();
+
+                if (Environment.IsDevelopment())
+                {
+                    options.DisableHttpsRequirement();
+                }
+
+                options.UseJsonWebTokens();
+                options.AddEphemeralSigningKey();
+            });
+
             services
                 .AddAuthentication()
                 .AddCookie()
@@ -99,7 +155,7 @@ namespace AuthServer
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.PostConfigure<RouteOptions>(options => { options.LowercaseUrls = true; });
+            services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
 
             #region Swagger
 
