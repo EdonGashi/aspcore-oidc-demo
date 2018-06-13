@@ -51,6 +51,7 @@ namespace AuthServer
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.UseOpenIddict();
             });
         }
 

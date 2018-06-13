@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\20180611093919_OpenIddict.cs" />
+    <Compile Remove="Data\Migrations\20180611093919_OpenIddict.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0" PrivateAssets="All" />
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-rc2-final" />
