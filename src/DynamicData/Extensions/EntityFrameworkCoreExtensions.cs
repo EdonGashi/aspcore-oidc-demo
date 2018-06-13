@@ -1,7 +1,7 @@
-﻿using DynamicData.DynamicProperties;
+﻿using DynamicData.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DynamicData
+namespace DynamicData.Extensions
 {
     public static class EntityFrameworkCoreExtensions
     {

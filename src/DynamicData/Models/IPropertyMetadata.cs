@@ -1,4 +1,4 @@
-﻿namespace DynamicData.DynamicProperties
+﻿namespace DynamicData.Models
 {
     internal interface IPropertyMetadata
     {

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DynamicData.DynamicProperties
+namespace DynamicData.Models
 {
     public abstract class UserProperty<TUser> : IPropertyMetadata where TUser : class
     {

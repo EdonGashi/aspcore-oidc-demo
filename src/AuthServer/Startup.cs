@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.Data;
 using AuthServer.Infrastructure;
-using DynamicData;
+using DynamicData.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;
@@ -54,6 +54,8 @@ namespace AuthServer
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
                 options.UseOpenIddict();
             });
+
+            services.AddDynamicDataStores<ApplicationDbContext, IdentityUser>();
         }
 
         private static void ConfigureServicesMvc(IServiceCollection services)
