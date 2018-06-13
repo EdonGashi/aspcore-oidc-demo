@@ -20,7 +20,7 @@ namespace AuthServer.V1.Controllers
             this.userManager = userManager;
         }
 
-        [Authorize(Roles = AppConstants.Roles.Admin)]
+        [Authorize(Roles = AppConstants.Roles.Administrator)]
         [HttpGet("{id}"), Produces("application/json")]
         public async Task<IActionResult> GetUserInfo([FromRoute] string id)
         {

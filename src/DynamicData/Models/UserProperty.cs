@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DynamicData.Models
 {
-    public abstract class UserProperty<TUser> : IPropertyMetadata where TUser : class
+    public abstract class UserProperty<TUser> : IDynamicProperty where TUser : class
     {
         [ForeignKey(nameof(User)), Required]
         public string UserId { get; set; }

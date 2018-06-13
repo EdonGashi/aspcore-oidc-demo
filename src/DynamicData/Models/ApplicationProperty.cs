@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DynamicData.Models
 {
-    public class ApplicationProperty : IPropertyMetadata
+    public class ApplicationProperty : IDynamicProperty
     {
         [Key]
         public string Key { get; set; }

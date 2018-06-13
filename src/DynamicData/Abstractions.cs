@@ -19,6 +19,8 @@ namespace DynamicData
         Task Remove(IEnumerable<string> keys);
 
         Task Clear();
+
+        Task SaveAsync();
     }
 
     public interface IApplicationPropertyManager : IPropertyManager
