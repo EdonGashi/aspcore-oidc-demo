@@ -11,6 +11,10 @@
   <ItemGroup>
     <Compile Remove="Data\Migrations\20180611093919_OpenIddict.cs" />
     <Compile Remove="Data\Migrations\20180611093919_OpenIddict.Designer.cs" />
+    <Compile Remove="Data\Migrations\20180613132202_DynamicData.cs" />
+    <Compile Remove="Data\Migrations\20180613132202_DynamicData.Designer.cs" />
+    <Compile Remove="Data\Migrations\20180613143949_DynamicData.cs" />
+    <Compile Remove="Data\Migrations\20180613143949_DynamicData.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DynamicData\DynamicData.csproj" />
     <ProjectReference Include="..\Utils\Utils.csproj" />
   </ItemGroup>
 

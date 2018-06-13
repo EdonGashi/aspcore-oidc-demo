@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.Data;
 using AuthServer.Infrastructure;
+using DynamicData;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;

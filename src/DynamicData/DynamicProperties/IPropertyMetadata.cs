@@ -1,4 +1,4 @@
-﻿namespace AuthServer.Data.DynamicProperties
+﻿namespace DynamicData.DynamicProperties
 {
     internal interface IPropertyMetadata
     {

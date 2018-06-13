@@ -1,18 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace AuthServer.Data.DynamicProperties
+namespace DynamicData.DynamicProperties
 {
-    public abstract class UserProperty : IPropertyMetadata
+    public abstract class UserProperty<TUser> : IPropertyMetadata where TUser : class
     {
         [ForeignKey(nameof(User)), Required]
         public string UserId { get; set; }
 
         [JsonIgnore]
-        public IdentityUser User { get; set; }
+        public TUser User { get; set; }
 
         public string Key { get; set; }
 
@@ -27,15 +26,15 @@ namespace AuthServer.Data.DynamicProperties
         public void SetValue<T>(T value) => Value = JsonConvert.SerializeObject(value);
     }
 
-    public class PersonalUserProperty : UserProperty
+    public class UserPersonalProperty<TUser> : UserProperty<TUser> where TUser : class
     {
     }
 
-    public class UserApplicationProperty : UserProperty
+    public class UserApplicationProperty<TUser> : UserProperty<TUser> where TUser : class
     {
     }
 
-    public class UserClientProperty : UserProperty
+    public class UserClientProperty<TUser> : UserProperty<TUser> where TUser : class
     {
     }
 }

@@ -1,4 +1,5 @@
-﻿using AuthServer.Data.DynamicProperties;
+﻿using DynamicData;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,7 @@ namespace AuthServer.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions options)
             : base(options)
         {
         }
@@ -14,15 +15,7 @@ namespace AuthServer.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            //builder.Entity<UserProperty>().HasKey(prop => new { prop.UserId, prop.Key });
+            builder.UseDynamicData<IdentityUser>();
         }
-
-        //public DbSet<ApplicationProperty> ApplicationProperties { get; set; }
-
-        //public DbSet<PersonalUserProperty> UserPersonalProperties { get; set; }
-
-        //public DbSet<UserApplicationProperty> UserApplicationProperties { get; set; }
-
-        //public DbSet<UserClientProperty> UserClientProperties { get; set; }
     }
 }

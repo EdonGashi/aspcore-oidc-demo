@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace AuthServer.Data.DynamicProperties
+namespace DynamicData.DynamicProperties
 {
     public class ApplicationProperty : IPropertyMetadata
     {
