@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.Data;
 using AuthServer.Infrastructure;
+using AuthServer.Models;
 using DynamicData.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -40,6 +41,7 @@ namespace AuthServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IAddressResolver>(new AddressResolver("https://localhost:44316"));
             ConfigureServicesDatabase(services);
             ConfigureServicesMvc(services);
             ConfigureServicesAuth(services);
@@ -55,7 +57,7 @@ namespace AuthServer
                 options.UseOpenIddict();
             });
 
-            services.AddDynamicDataStores<ApplicationDbContext, IdentityUser>();
+            services.AddDynamicDataStores<ApplicationDbContext, ApplicationUser>();
         }
 
         private static void ConfigureServicesMvc(IServiceCollection services)
@@ -69,7 +71,7 @@ namespace AuthServer
         private void ConfigureServicesAuth(IServiceCollection services)
         {
             services
-                .AddIdentity<IdentityUser, IdentityRole>(options =>
+                .AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
                     options.Password.RequireLowercase = false;
@@ -221,8 +223,30 @@ namespace AuthServer
             {
                 var security = new Dictionary<string, IEnumerable<string>>
                 {
-                    { "Bearer", new string[] { } },
+                    ["Bearer"] = new string[] { },
+                    ["oauth2"] = new string[]
+                    {
+                        "openid",
+                        "profile",
+                        "phone",
+                        "roles"
+                    }
                 };
+
+                options.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Type = "oauth2",
+                    Flow = "implicit",
+                    AuthorizationUrl = "/connect/authorize",
+                    TokenUrl = "/connect/token",
+                    Scopes = new Dictionary<string, string>
+                    {
+                        ["openid"] = "OpenID Connect.",
+                        ["profile"] = "Basic profile information.",
+                        ["phone"] = "Phone number.",
+                        ["roles"] = "Roles in application."
+                    }
+                });
 
                 options.AddSecurityDefinition("Bearer", new ApiKeyScheme
                 {
@@ -289,7 +313,10 @@ namespace AuthServer
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                // build a swagger endpoint for each discovered API version
+                options.OAuthClientId("swagger");
+                options.OAuthAppName("Swagger");
+                options.OAuthScopeSeparator(" ");
+                options.OAuthUseBasicAuthenticationWithAccessCodeGrant();
                 foreach (var description in provider.ApiVersionDescriptions)
                 {
                     options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());

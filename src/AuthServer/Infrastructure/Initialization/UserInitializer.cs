@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Utils.Initialization;
 
-namespace AuthServer.Initialization
+namespace AuthServer.Infrastructure.Initialization
 {
     public class UserInitializer : IStartupService
     {
