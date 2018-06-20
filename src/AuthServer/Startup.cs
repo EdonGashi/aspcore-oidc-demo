@@ -317,6 +317,7 @@ namespace AuthServer
                 options.OAuthAppName("Swagger");
                 options.OAuthScopeSeparator(" ");
                 options.OAuthUseBasicAuthenticationWithAccessCodeGrant();
+                options.OAuthAdditionalQueryStringParams(new { nonce = "swagger" });
                 foreach (var description in provider.ApiVersionDescriptions)
                 {
                     options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());

@@ -13,7 +13,7 @@ namespace AuthServer.V1.Controllers
     {
         [Authorize]
         [HttpGet("me"), Produces("application/json")]
-        public IActionResult Claims()
+        public IActionResult GetCurrentUserInfo()
         {
             var identities = new JArray();
             var result = new JObject

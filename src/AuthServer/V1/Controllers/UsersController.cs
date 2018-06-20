@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
+using AuthServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,9 @@ namespace AuthServer.V1.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class UsersController : Controller
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public UsersController(UserManager<IdentityUser> userManager)
+        public UsersController(UserManager<ApplicationUser> userManager)
         {
             this.userManager = userManager;
         }

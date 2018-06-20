@@ -17,14 +17,15 @@ using Utils.Mvc;
 
 namespace AuthServer.Controllers
 {
-    public class AuthorizationController : Controller
+    [ApiVersionNeutral, ApiExplorerSettings(IgnoreApi = true)]
+    public class ConnectController : Controller
     {
         private readonly OpenIddictApplicationManager<OpenIddictApplication> applicationManager;
         private readonly IOptions<IdentityOptions> identityOptions;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public AuthorizationController(
+        public ConnectController(
             OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
@@ -36,12 +37,31 @@ namespace AuthServer.Controllers
             this.userManager = userManager;
         }
 
-        [Authorize, HttpGet("~/connect/authorize")]
+        [HttpGet("~/connect/authorize")]
         public async Task<IActionResult> Authorize(OpenIdConnectRequest request)
         {
             Debug.Assert(request.IsAuthorizationRequest(),
                 "The OpenIddict binder for ASP.NET Core MVC is not registered. " +
                 "Make sure services.AddOpenIddict().AddMvcBinders() is correctly called.");
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                // If the client application request promptless authentication,
+                // return an error indicating that the user is not logged in.
+                if (request.HasPrompt(OpenIdConnectConstants.Prompts.None))
+                {
+                    var properties = new AuthenticationProperties(new Dictionary<string, string>
+                    {
+                        [OpenIdConnectConstants.Properties.Error] = OpenIdConnectConstants.Errors.LoginRequired,
+                        [OpenIdConnectConstants.Properties.ErrorDescription] = "The user is not logged in."
+                    });
+
+                    // Ask OpenIddict to return a login_required error to the client application.
+                    return Forbid(properties, OpenIdConnectServerDefaults.AuthenticationScheme);
+                }
+
+                return Challenge();
+            }
 
             // Retrieve the application details from the database.
             var application = await applicationManager.FindByClientIdAsync(request.ClientId, HttpContext.RequestAborted);
