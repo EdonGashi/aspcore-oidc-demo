@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
@@ -19,10 +21,11 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenIddict.Core;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using Utils.Authorization;
 using Utils.Documentation;
+using Utils.Security;
 
 namespace AuthServer
 {
@@ -41,11 +44,20 @@ namespace AuthServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IAddressResolver>(new AddressResolver("https://localhost:44316"));
+            var scopes = typeof(AppConstants.Scopes)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+                .Select(f => (string)f.GetRawConstantValue())
+                .ToList();
+
+            var address = new AddressResolver(Configuration["Tokens:Issuer"]);
+            services.AddSingleton<IAddressResolver>(address);
+            services.AddSingleton<IScopeCollection>(new ScopeCollection(scopes));
+
             ConfigureServicesDatabase(services);
             ConfigureServicesMvc(services);
-            ConfigureServicesAuth(services);
-            ConfigureServicesApiExplorer(services);
+            ConfigureServicesAuth(services, scopes);
+            ConfigureServicesApiExplorer(services, scopes);
             ConfigureServicesCookieConsent(services);
         }
 
@@ -60,7 +72,7 @@ namespace AuthServer
             services.AddDynamicDataStores<ApplicationDbContext, ApplicationUser>();
         }
 
-        private static void ConfigureServicesMvc(IServiceCollection services)
+        private void ConfigureServicesMvc(IServiceCollection services)
         {
             services
                 .AddMvc()
@@ -68,8 +80,12 @@ namespace AuthServer
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
         }
 
-        private void ConfigureServicesAuth(IServiceCollection services)
+        private void ConfigureServicesAuth(IServiceCollection services, List<string> scopes)
         {
+            var certinfo = new CertificateInfo();
+            Configuration.GetSection("Tokens:Certificate").Bind(certinfo);
+            var cert = CertificateHelper.LoadCertificate(certinfo, Environment.IsDevelopment());
+
             services
                 .AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
@@ -90,60 +106,55 @@ namespace AuthServer
                 .AddDefaultTokenProviders();
 
             // Register the OpenIddict services.
-            services.AddOpenIddict(options =>
-            {
-                // Register the Entity Framework stores.
-                options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
-
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.AddMvcBinders();
-
-                // Enable the authorization, logout, token and userinfo endpoints.
-                options
-                    .EnableAuthorizationEndpoint("/connect/authorize")
-                    .EnableLogoutEndpoint("/connect/logout")
-                    .EnableTokenEndpoint("/connect/token")
-                    .EnableUserinfoEndpoint("/api/v1/users/me");
-
-                // Mark the "email", "profile" and "roles" scopes as supported scopes.
-                options.RegisterScopes(
-                    OpenIdConnectConstants.Scopes.Email,
-                    OpenIdConnectConstants.Scopes.Profile,
-                    OpenIddictConstants.Scopes.Roles);
-
-                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
-                // can enable the other flows if you need to support implicit or client credentials.
-                options
-                    .AllowAuthorizationCodeFlow()
-                    .AllowPasswordFlow()
-                    .AllowImplicitFlow()
-                    .AllowRefreshTokenFlow();
-
-                // Make the "client_id" parameter mandatory when sending a token request.
-                options.RequireClientIdentification();
-
-                // When request caching is enabled, authorization and logout requests
-                // are stored in the distributed cache by OpenIddict and the user agent
-                // is redirected to the same page with a single parameter (request_id).
-                // This allows flowing large OpenID Connect requests even when using
-                // an external authentication provider like Google, Facebook or Twitter.
-                options.EnableRequestCaching();
-
-                // Enable scope validation, so that authorization and token requests
-                // that specify unregistered scopes are automatically rejected.
-                options.EnableScopeValidation();
-
-                if (Environment.IsDevelopment())
+            services
+                .AddOpenIddict()
+                .AddServer(options =>
                 {
-                    options.DisableHttpsRequirement();
-                }
+                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Note: if you don't call this method, you won't be able to
+                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                    options.UseMvc();
 
-                options.UseJsonWebTokens();
-                options.AddEphemeralSigningKey();
-            });
+                    // Enable the authorization, logout, token and userinfo endpoints.
+                    options
+                        .EnableAuthorizationEndpoint("/connect/authorize")
+                        .EnableLogoutEndpoint("/connect/logout")
+                        .EnableTokenEndpoint("/connect/token")
+                        .EnableUserinfoEndpoint("/api/v1/users/me");
 
+                    options.RegisterScopes(scopes.ToArray());
+
+                    // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                    // can enable the other flows if you need to support implicit or client credentials.
+                    options
+                        .AllowAuthorizationCodeFlow()
+                        .AllowPasswordFlow()
+                        .AllowImplicitFlow()
+                        .AllowRefreshTokenFlow();
+
+                    // When request caching is enabled, authorization and logout requests
+                    // are stored in the distributed cache by OpenIddict and the user agent
+                    // is redirected to the same page with a single parameter (request_id).
+                    // This allows flowing large OpenID Connect requests even when using
+                    // an external authentication provider like Google, Facebook or Twitter.
+                    options.EnableRequestCaching();
+
+                    if (Environment.IsDevelopment())
+                    {
+                        options.DisableHttpsRequirement();
+                    }
+
+                    options.UseJsonWebTokens();
+                    options.AddSigningCertificate(cert);
+                })
+                .AddCore(options =>
+                {
+                    options.UseEntityFrameworkCore()
+                        .UseDbContext<ApplicationDbContext>();
+                });
+
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             services
                 .AddAuthentication()
                 .AddCookie()
@@ -155,7 +166,24 @@ namespace AuthServer
                     options.AccessType = "offline";
                     options.SaveTokens = true;
                 })
-                .AddOAuthValidation();
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = true;
+                    options.IncludeErrorDetails = true;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = OpenIdConnectConstants.Claims.Subject,
+                        RoleClaimType = OpenIdConnectConstants.Claims.Role,
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["Tokens:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = "resource_server",
+                        ValidateIssuerSigningKey = false,
+                        IssuerSigningKey = new X509SecurityKey(cert),
+                        ValidateLifetime = true
+                    };
+                });
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -194,7 +222,7 @@ namespace AuthServer
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
         }
 
-        private static void ConfigureServicesCookieConsent(IServiceCollection services)
+        private void ConfigureServicesCookieConsent(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -204,7 +232,7 @@ namespace AuthServer
             });
         }
 
-        private static void ConfigureServicesApiExplorer(IServiceCollection services)
+        private void ConfigureServicesApiExplorer(IServiceCollection services, List<string> scopes)
         {
             services.AddMvcCore().AddVersionedApiExplorer(options =>
             {
@@ -224,13 +252,7 @@ namespace AuthServer
                 var security = new Dictionary<string, IEnumerable<string>>
                 {
                     ["Bearer"] = new string[] { },
-                    ["oauth2"] = new string[]
-                    {
-                        "openid",
-                        "profile",
-                        "phone",
-                        "roles"
-                    }
+                    ["oauth2"] = scopes
                 };
 
                 options.AddSecurityDefinition("oauth2", new OAuth2Scheme
@@ -239,13 +261,7 @@ namespace AuthServer
                     Flow = "implicit",
                     AuthorizationUrl = "/connect/authorize",
                     TokenUrl = "/connect/token",
-                    Scopes = new Dictionary<string, string>
-                    {
-                        ["openid"] = "OpenID Connect.",
-                        ["profile"] = "Basic profile information.",
-                        ["phone"] = "Phone number.",
-                        ["roles"] = "Roles in application."
-                    }
+                    Scopes = scopes.ToDictionary(s => s, s => Configuration.GetScopeTitle(s))
                 });
 
                 options.AddSecurityDefinition("Bearer", new ApiKeyScheme

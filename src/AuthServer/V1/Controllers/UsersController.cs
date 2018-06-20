@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using OpenIddict.Core;
+using OpenIddict.Abstractions;
 using Utils.Authorization;
 
 namespace AuthServer.V1.Controllers
@@ -52,7 +52,7 @@ namespace AuthServer.V1.Controllers
         /// <summary>
         /// Returns basic claims for current user.
         /// </summary>
-        [Authorize(OpenIdConnectConstants.Scopes.OpenId)]
+        [Authorize(AppConstants.Scopes.OpenId)]
         [HttpGet("me"), Produces("application/json")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {

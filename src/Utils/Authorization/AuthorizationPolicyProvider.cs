@@ -24,7 +24,7 @@ namespace Utils.Authorization
                 return policy;
             }
 
-            var requirement = new HasScopeRequirement(policyName, /* TODO: Provide iss domain */null);
+            var requirement = new HasScopeRequirement(policyName, configuration["Tokens:Issuer"]);
             var builder = new AuthorizationPolicyBuilder()
                 .AddRequirements(requirement);
 

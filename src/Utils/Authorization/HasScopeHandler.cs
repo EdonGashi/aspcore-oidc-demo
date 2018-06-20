@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -17,16 +18,9 @@ namespace Utils.Authorization
                 return Task.CompletedTask;
             }
 
-            // If user does not have the scope claim, get out of here
-            if (!context.User.HasClaim(c => c.Type == OpenIdConnectConstants.Claims.Scope && c.Issuer == requirement.Issuer))
-            {
-                return Task.CompletedTask;
-            }
-
-            // Split the scopes string into an array
-            var scopes = context
-                .User.FindFirst(c => c.Type == OpenIdConnectConstants.Claims.Scope && (requirement.Issuer == null || c.Issuer == requirement.Issuer))
-                .Value.Split(' ');
+            var scopes = context.User.Claims
+                .Where(c => c.Type == OpenIdConnectConstants.Claims.Scope && (requirement.Issuer == null || c.Issuer == requirement.Issuer))
+                .SelectMany(s => s.Value?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>());
 
             if (scopes.Any(requirement.Scope.Contains))
             {

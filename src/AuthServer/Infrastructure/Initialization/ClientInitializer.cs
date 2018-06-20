@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AuthServer.Data;
+using OpenIddict.Abstractions;
 using OpenIddict.Core;
-using OpenIddict.Models;
+using OpenIddict.EntityFrameworkCore.Models;
 using Utils.Initialization;
 
 namespace AuthServer.Infrastructure.Initialization
@@ -32,15 +33,18 @@ namespace AuthServer.Infrastructure.Initialization
         private readonly IAddressResolver addressResolver;
         private readonly ApplicationDbContext context;
         private readonly OpenIddictApplicationManager<OpenIddictApplication> manager;
+        private readonly IScopeCollection scopes;
 
         public ClientInitializer(
             IAddressResolver addressResolver,
             ApplicationDbContext context,
-            OpenIddictApplicationManager<OpenIddictApplication> manager)
+            OpenIddictApplicationManager<OpenIddictApplication> manager,
+            IScopeCollection scopes)
         {
             this.addressResolver = addressResolver;
             this.context = context;
             this.manager = manager;
+            this.scopes = scopes;
         }
 
         public async Task InitializeAsync()
@@ -113,10 +117,14 @@ namespace AuthServer.Infrastructure.Initialization
                     Permissions =
                     {
                         OpenIddictConstants.Permissions.Endpoints.Authorization,
-                        OpenIddictConstants.Permissions.Endpoints.Token,
                         OpenIddictConstants.Permissions.GrantTypes.Implicit
                     }
                 };
+
+                foreach (var scope in scopes.GetScopes())
+                {
+                    descriptor.Permissions.Add($"scp:{scope}");
+                }
 
                 await manager.CreateAsync(descriptor);
             }

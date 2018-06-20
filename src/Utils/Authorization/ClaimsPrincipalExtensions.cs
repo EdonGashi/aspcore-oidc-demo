@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security.Claims;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Identity;
@@ -14,8 +15,10 @@ namespace Utils.Authorization
                 return false;
             }
 
-            var scopes = claimsPrincipal.FindFirstValue(OpenIdConnectConstants.Claims.Scope)?.Split(' ');
-            return scopes != null && scopes.Any(s => s == scope);
+            return claimsPrincipal.Claims
+                 .Where(c => c.Type == OpenIdConnectConstants.Claims.Scope)
+                 .SelectMany(s => s.Value?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>())
+                 .Any(s => s == scope);
         }
 
         public static bool IsCookieAuthenticated(this ClaimsPrincipal claimsPrincipal)

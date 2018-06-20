@@ -19,7 +19,7 @@ namespace AuthServer.V1.Controllers
             var result = new JObject
             {
                 ["identities"] = identities,
-                ["claims"] = new JObject(User.Claims.Select(c => new JProperty(c.Type, c.Value)))
+                ["claims"] = new JArray(User.Claims.Select(c => new JArray(c.Type, c.Value)))
             };
 
             foreach (var claimsIdentity in User.Identities)
