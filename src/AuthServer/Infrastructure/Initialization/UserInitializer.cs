@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AuthServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Utils.Initialization;
@@ -9,10 +10,10 @@ namespace AuthServer.Infrastructure.Initialization
     public class UserInitializer : IStartupService
     {
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger logger;
 
-        public UserInitializer(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, ILogger<UserInitializer> logger)
+        public UserInitializer(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<UserInitializer> logger)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -56,7 +57,7 @@ namespace AuthServer.Infrastructure.Initialization
                 return;
             }
 
-            var result = await userManager.CreateAsync(user = new IdentityUser { Email = email, UserName = email }, email);
+            var result = await userManager.CreateAsync(user = new ApplicationUser { Email = email, UserName = email }, email);
 
             if (result.Succeeded)
             {
