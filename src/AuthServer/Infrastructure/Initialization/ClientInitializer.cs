@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AuthServer.Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using OpenIddict.EntityFrameworkCore.Models;
@@ -107,7 +109,8 @@ namespace AuthServer.Infrastructure.Initialization
             //    await manager.CreateAsync(descriptor);
             //}
 
-            if (await manager.FindByClientIdAsync("swagger") == null)
+            var swagger = await manager.FindByClientIdAsync("swagger");
+            if (swagger == null)
             {
                 var descriptor = new OpenIddictApplicationDescriptor
                 {
@@ -127,6 +130,17 @@ namespace AuthServer.Infrastructure.Initialization
                 }
 
                 await manager.CreateAsync(descriptor);
+            }
+            else
+            {
+                var permissions = new JArray(OpenIddictConstants.Permissions.Endpoints.Authorization, OpenIddictConstants.Permissions.GrantTypes.Implicit);
+                foreach (var scope in scopes.GetScopes())
+                {
+                    permissions.Add($"scp:{scope}");
+                }
+
+                swagger.Permissions = JsonConvert.SerializeObject(permissions);
+                await manager.UpdateAsync(swagger);
             }
         }
     }

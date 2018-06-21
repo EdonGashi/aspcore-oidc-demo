@@ -1,16 +1,33 @@
-﻿@model AuthorizeViewModel
+﻿@using Microsoft.Extensions.Configuration
+@model AuthorizeViewModel
+@inject IConfiguration Configuration
 
 <div class="jumbotron">
-    <h1>Authorization</h1>
+  <h1>Authorization</h1>
+  @{
+    var scopes = Model.ScopesWithoutOpenid;
+    if (scopes.Length > 0)
+    {
+      <p class="lead text-left"><strong>@Model.ApplicationName</strong> requests permission to:</p>
+      <ul>
+        @foreach (var scope in scopes)
+        {
+          <li>@Configuration.GetScopeTitle(scope)</li>
+        }
+      </ul>
+    }
+    else
+    {
+      <p class="lead text-left">Sign in to <strong>@Model.ApplicationName</strong>?</p>
+    }
+  }
 
-    <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+  <form method="post">
+    @Html.AntiForgeryToken()
 
-    <form method="post">
-        @Html.AntiForgeryToken()
+    <input type="hidden" name="request_id" value="@Model.RequestId" />
 
-        <input type="hidden" name="request_id" value="@Model.RequestId" />
-
-        <input class="btn btn-lg btn-success" name="submit.Accept" type="submit" value="Yes" />
-        <input class="btn btn-lg btn-danger" name="submit.Deny" type="submit" value="No" />
-    </form>
+    <input class="btn btn-lg btn-success" name="submit.accept" type="submit" value="Accept" />
+    <input class="btn btn-lg btn-danger" name="submit.deny" type="submit" value="Cancel" />
+  </form>
 </div>

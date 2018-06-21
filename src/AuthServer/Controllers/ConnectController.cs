@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
+using AuthServer.Infrastructure;
 using AuthServer.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -25,17 +26,20 @@ namespace AuthServer.Controllers
         private readonly IOptions<IdentityOptions> identityOptions;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IScopeCollection scopes;
 
         public ConnectController(
             OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IScopeCollection scopes)
         {
             this.applicationManager = applicationManager;
             this.identityOptions = identityOptions;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            this.scopes = scopes;
         }
 
         [HttpGet("~/connect/authorize")]
@@ -65,13 +69,15 @@ namespace AuthServer.Controllers
             }
 
             // Retrieve the application details from the database.
-            var application = await applicationManager.FindByClientIdAsync(request.ClientId, HttpContext.RequestAborted);
+            var application =
+                await applicationManager.FindByClientIdAsync(request.ClientId, HttpContext.RequestAborted);
             if (application == null)
             {
                 return View("Error", new ErrorViewModel
                 {
                     Error = OpenIdConnectConstants.Errors.InvalidClient,
-                    ErrorDescription = "Details concerning the calling client application cannot be found in the database"
+                    ErrorDescription =
+                        "Details concerning the calling client application cannot be found in the database."
                 });
             }
 
@@ -85,7 +91,7 @@ namespace AuthServer.Controllers
             });
         }
 
-        [Authorize, FormValueRequired("submit.Accept")]
+        [Authorize, FormValueRequired("submit.accept")]
         [HttpPost("~/connect/authorize"), ValidateAntiForgeryToken]
         public async Task<IActionResult> Accept(OpenIdConnectRequest request)
         {
@@ -111,7 +117,7 @@ namespace AuthServer.Controllers
             return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
         }
 
-        [Authorize, FormValueRequired("submit.Deny")]
+        [Authorize, FormValueRequired("submit.deny")]
         [HttpPost("~/connect/authorize"), ValidateAntiForgeryToken]
         public IActionResult Deny()
         {
@@ -195,7 +201,8 @@ namespace AuthServer.Controllers
         }
 
         private async Task<AuthenticationTicket> CreateTicketAsync(
-            OpenIdConnectRequest request, ApplicationUser user,
+            OpenIdConnectRequest request,
+            ApplicationUser user,
             AuthenticationProperties properties = null)
         {
             // Create a new ClaimsPrincipal containing the claims that
@@ -208,17 +215,9 @@ namespace AuthServer.Controllers
 
             if (!request.IsAuthorizationCodeGrantType())
             {
-                // Set the list of scopes granted to the client application.
-                // Note: the offline_access scope must be granted
-                // to allow OpenIddict to return a refresh token.
-                ticket.SetScopes(new[]
-                {
-                    OpenIdConnectConstants.Scopes.OpenId,
-                    OpenIdConnectConstants.Scopes.Email,
-                    OpenIdConnectConstants.Scopes.Profile,
-                    OpenIdConnectConstants.Scopes.OfflineAccess,
-                    OpenIddictConstants.Scopes.Roles
-                }.Intersect(request.GetScopes()));
+                ticket.SetScopes(new[] { OpenIdConnectConstants.Scopes.OfflineAccess }
+                    .Concat(scopes.GetScopes())
+                    .Intersect(request.GetScopes()));
             }
 
             ticket.SetResources("resource_server");
@@ -242,9 +241,12 @@ namespace AuthServer.Controllers
 
                 // Only add the iterated claim to the id_token if the corresponding scope was granted to the client application.
                 // The other claims will only be added to the access_token, which is encrypted when using the default format.
-                if ((claim.Type == OpenIdConnectConstants.Claims.Name && ticket.HasScope(OpenIdConnectConstants.Scopes.Profile)) ||
-                    (claim.Type == OpenIdConnectConstants.Claims.Email && ticket.HasScope(OpenIdConnectConstants.Scopes.Email)) ||
-                    (claim.Type == OpenIdConnectConstants.Claims.Role && ticket.HasScope(OpenIddictConstants.Claims.Roles)))
+                if (claim.Type == OpenIdConnectConstants.Claims.Name &&
+                    ticket.HasScope(OpenIdConnectConstants.Scopes.Profile) ||
+                    claim.Type == OpenIdConnectConstants.Claims.Email &&
+                    ticket.HasScope(OpenIdConnectConstants.Scopes.Email) ||
+                    claim.Type == OpenIdConnectConstants.Claims.Role &&
+                    ticket.HasScope(OpenIddictConstants.Claims.Roles))
                 {
                     destinations.Add(OpenIdConnectConstants.Destinations.IdentityToken);
                 }

@@ -249,11 +249,13 @@ namespace AuthServer
 
             services.AddSwaggerGen(options =>
             {
-                var security = new Dictionary<string, IEnumerable<string>>
+                options.AddSecurityDefinition("Bearer", new ApiKeyScheme
                 {
-                    ["Bearer"] = new string[] { },
-                    ["oauth2"] = scopes
-                };
+                    Description = "OAuth 2.0 Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
 
                 options.AddSecurityDefinition("oauth2", new OAuth2Scheme
                 {
@@ -264,16 +266,7 @@ namespace AuthServer
                     Scopes = scopes.ToDictionary(s => s, s => Configuration.GetScopeTitle(s))
                 });
 
-                options.AddSecurityDefinition("Bearer", new ApiKeyScheme
-                {
-                    Description = "OAuth 2.0 Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = "header",
-                    Type = "apiKey"
-                });
-
-                options.AddSecurityRequirement(security);
-
+                options.OperationFilter<SecurityRequirementsOperationFilter>();
                 options.DocumentFilter<SwaggerUtils.LowercaseDocumentFilter>();
 
                 // resolve the IApiVersionDescriptionProvider service
