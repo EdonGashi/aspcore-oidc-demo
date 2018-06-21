@@ -117,6 +117,7 @@ namespace AuthServer.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
+                    await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                     if (result.Succeeded)
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
