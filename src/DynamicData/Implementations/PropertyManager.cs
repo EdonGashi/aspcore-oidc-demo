@@ -68,7 +68,7 @@ namespace DynamicData.Implementations
                 current = new TProperty
                 {
                     Key = key,
-                    Value = value.ToString(),
+                    Value = JsonConvert.SerializeObject(value),
                     Flags = flags
                 };
 
