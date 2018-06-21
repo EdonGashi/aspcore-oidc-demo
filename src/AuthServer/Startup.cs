@@ -17,6 +17,7 @@ using AuthServer.Infrastructure;
 using AuthServer.Models;
 using DynamicData.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -185,8 +186,24 @@ namespace AuthServer
                     };
                 });
 
+            if (Environment.IsDevelopment())
+            {
+                services
+                    .AddDataProtection()
+                    .PersistKeysToFileSystem(GetKeyRingDirInfo())
+                    .SetApplicationName("auth_server");
+            }
+            else
+            {
+                services
+                    .AddDataProtection()
+                    .ProtectKeysWithCertificate(Configuration["CookieProtection:Thumbprint"]
+                                                ?? throw new InvalidOperationException("Could not find key protection certificate."));
+            }
+
             services.ConfigureApplicationCookie(options =>
             {
+                options.Cookie.Name = "auth";
                 options.Events.OnRedirectToLogin = context =>
                 {
                     if (context.Request.Path.StartsWithSegments("/api") &&
@@ -332,6 +349,24 @@ namespace AuthServer
                     options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
                 }
             });
+        }
+
+        private DirectoryInfo GetKeyRingDirInfo()
+        {
+            var applicationBasePath = AppContext.BaseDirectory;
+            var directoryInfo = new DirectoryInfo(applicationBasePath);
+            do
+            {
+                directoryInfo = directoryInfo.Parent;
+                var keyRingDirectoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "KeyRing"));
+                if (keyRingDirectoryInfo.Exists)
+                {
+                    return keyRingDirectoryInfo;
+                }
+            }
+            while (directoryInfo.Parent != null);
+
+            throw new Exception($"KeyRing folder could not be located using the application root {applicationBasePath}.");
         }
     }
 }
