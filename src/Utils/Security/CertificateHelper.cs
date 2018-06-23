@@ -16,6 +16,11 @@ namespace Utils.Security
     {
         public static X509Certificate2 LoadCertificate(CertificateInfo info, bool isDevelopment)
         {
+            if (info.FilePath != null && info.Password != null)
+            {
+                return new X509Certificate2(info.FilePath, info.Password);
+            }
+
             if (info.StoreName != null && info.StoreLocation != null)
             {
                 using (var store = new X509Store(info.StoreName, Enum.Parse<StoreLocation>(info.StoreLocation)))
@@ -33,11 +38,6 @@ namespace Utils.Security
 
                     return certificate[0];
                 }
-            }
-
-            if (info.FilePath != null && info.Password != null)
-            {
-                return new X509Certificate2(info.FilePath, info.Password);
             }
 
             throw new InvalidOperationException("No valid certificate found.");

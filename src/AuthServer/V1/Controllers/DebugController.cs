@@ -2,6 +2,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using AspNet.Security.OpenIdConnect.Primitives;
 using AuthServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +31,15 @@ namespace AuthServer.V1.Controllers
         public async Task<IActionResult> GetCurrentUserInfo()
         {
             var currentUser = await userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return BadRequest(new OpenIdConnectResponse
+                {
+                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
+                    ErrorDescription = "The user profile is no longer available."
+                });
+            }
+
             var identities = new JArray();
             var result = new JObject
             {

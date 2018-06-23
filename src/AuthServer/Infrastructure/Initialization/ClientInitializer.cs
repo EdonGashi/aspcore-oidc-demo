@@ -51,7 +51,6 @@ namespace AuthServer.Infrastructure.Initialization
 
         public async Task InitializeAsync()
         {
-            await context.Database.EnsureCreatedAsync();
             //if (await manager.FindByClientIdAsync("react") == null)
             //{
             //    var descriptor = new OpenIddictApplicationDescriptor

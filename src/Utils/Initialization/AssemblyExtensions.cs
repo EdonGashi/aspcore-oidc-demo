@@ -13,7 +13,8 @@ namespace Utils.Initialization
             var iStartupService = typeof(IStartupService);
             var types = assembly
                 .GetTypes()
-                .Where(p => iStartupService.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract);
+                .Where(p => iStartupService.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
+                .OrderBy(t => t.GetCustomAttribute<StartupOrderAttribute>()?.Order ?? 0);
 
             foreach (var type in types)
             {
