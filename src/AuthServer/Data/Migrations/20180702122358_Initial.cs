@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AuthServer.Data.Migrations
@@ -23,20 +22,7 @@ namespace AuthServer.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DynamicDataApplicationProperties",
-                columns: table => new
-                {
-                    Key = table.Column<string>(nullable: false),
-                    Value = table.Column<string>(nullable: true),
-                    Flags = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DynamicDataApplicationProperties", x => x.Key);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IdentityUser",
+                name: "AspNetUsers",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
@@ -53,12 +39,24 @@ namespace AuthServer.Data.Migrations
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false)
+                    AccessFailedCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IdentityUser", x => x.Id);
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DynamicDataApplicationProperties",
+                columns: table => new
+                {
+                    Key = table.Column<string>(nullable: false),
+                    Value = table.Column<string>(nullable: true),
+                    Flags = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DynamicDataApplicationProperties", x => x.Key);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,7 +102,7 @@ namespace AuthServer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Sqlite:Autoincrement", true),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -125,7 +123,7 @@ namespace AuthServer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -134,9 +132,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUserClaims_IdentityUser_UserId",
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -154,9 +152,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
                     table.ForeignKey(
-                        name: "FK_AspNetUserLogins_IdentityUser_UserId",
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -178,9 +176,9 @@ namespace AuthServer.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_IdentityUser_UserId",
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -198,9 +196,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
-                        name: "FK_AspNetUserTokens_IdentityUser_UserId",
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -218,9 +216,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_DynamicDataUserApplicationProperties", x => new { x.UserId, x.Key });
                     table.ForeignKey(
-                        name: "FK_DynamicDataUserApplicationProperties_IdentityUser_UserId",
+                        name: "FK_DynamicDataUserApplicationProperties_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -238,9 +236,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_DynamicDataUserClientProperties", x => new { x.UserId, x.Key });
                     table.ForeignKey(
-                        name: "FK_DynamicDataUserClientProperties_IdentityUser_UserId",
+                        name: "FK_DynamicDataUserClientProperties_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -258,9 +256,9 @@ namespace AuthServer.Data.Migrations
                 {
                     table.PrimaryKey("PK_DynamicDataUserPersonalProperties", x => new { x.UserId, x.Key });
                     table.ForeignKey(
-                        name: "FK_DynamicDataUserPersonalProperties_IdentityUser_UserId",
+                        name: "FK_DynamicDataUserPersonalProperties_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "IdentityUser",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -332,8 +330,7 @@ namespace AuthServer.Data.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -352,15 +349,14 @@ namespace AuthServer.Data.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
-                table: "IdentityUser",
+                table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
-                table: "IdentityUser",
+                table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
@@ -393,8 +389,7 @@ namespace AuthServer.Data.Migrations
                 name: "IX_OpenIddictTokens_ReferenceId",
                 table: "OpenIddictTokens",
                 column: "ReferenceId",
-                unique: true,
-                filter: "[ReferenceId] IS NOT NULL");
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -436,7 +431,7 @@ namespace AuthServer.Data.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "IdentityUser");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

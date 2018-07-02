@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AuthServer.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Utils.Initialization;
 
 namespace AuthServer.Infrastructure.Initialization
@@ -9,15 +11,25 @@ namespace AuthServer.Infrastructure.Initialization
     public class DatabaseInitializer : IStartupService
     {
         private readonly ApplicationDbContext context;
+        private readonly ILogger logger;
 
-        public DatabaseInitializer(ApplicationDbContext context)
+        public DatabaseInitializer(ApplicationDbContext context, ILogger<DatabaseInitializer> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public async Task InitializeAsync()
         {
-            await context.Database.MigrateAsync();
+            try
+            {
+                logger.LogDebug("Attempting to migrate database.");
+                await context.Database.MigrateAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while migrating database.");
+            }
         }
     }
 }

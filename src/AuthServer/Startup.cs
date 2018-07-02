@@ -66,7 +66,7 @@ namespace AuthServer
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlite($"Data Source={Configuration["DB_PATH"]};");
                 options.UseOpenIddict();
             });
 
