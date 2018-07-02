@@ -293,7 +293,7 @@ namespace AuthServer
                 });
 
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
-                options.DocumentFilter<SwaggerUtils.LowercaseDocumentFilter>();
+                options.DocumentFilter<LowercaseDocumentFilter>();
 
                 // resolve the IApiVersionDescriptionProvider service
                 // note: that we have to build a temporary service provider here because one has not been created yet
