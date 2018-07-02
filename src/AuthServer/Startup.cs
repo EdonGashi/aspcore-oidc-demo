@@ -175,7 +175,9 @@ namespace AuthServer
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.RequireHttpsMetadata = true;
+                    options.Authority = Configuration["Tokens:Issuer"];
+                    options.Audience = "resource_server";
+                    options.RequireHttpsMetadata = !Environment.IsDevelopment();
                     options.IncludeErrorDetails = true;
                     options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -186,7 +188,8 @@ namespace AuthServer
                         ValidIssuer = Configuration["Tokens:Issuer"],
                         ValidateAudience = true,
                         ValidAudience = "resource_server",
-                        ValidateIssuerSigningKey = false,
+                        RequireSignedTokens = true,
+                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new X509SecurityKey(cert),
                         ValidateLifetime = true
                     };
