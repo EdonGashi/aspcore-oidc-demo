@@ -64,9 +64,15 @@ namespace AuthServer
 
         private void ConfigureServicesDatabase(IServiceCollection services)
         {
+            var dbPath = Configuration["DB_PATH"];
+            if (string.IsNullOrEmpty(dbPath))
+            {
+                throw new InvalidOperationException("DB_PATH musit be set to a valid path.");
+            }
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlite($"Data Source={Configuration["DB_PATH"]};");
+                options.UseSqlite($"Data Source={dbPath};");
                 options.UseOpenIddict();
             });
 
