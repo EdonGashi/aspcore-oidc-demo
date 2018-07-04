@@ -71,28 +71,6 @@ namespace AuthServer.Infrastructure.Initialization
             //    await manager.CreateAsync(descriptor);
             //}
 
-            //if (await manager.FindByClientIdAsync("mvc") == null)
-            //{
-            //    var descriptor = new OpenIddictApplicationDescriptor
-            //    {
-            //        ClientId = "mvc",
-            //        ClientSecret = "mvc_secret",
-            //        DisplayName = "MVC client application",
-            //        PostLogoutRedirectUris = { new Uri("http://localhost:3002/signout-callback-oidc") },
-            //        RedirectUris = { new Uri("http://localhost:3002/signin-oidc") },
-            //        Permissions =
-            //            {
-            //                OpenIddictConstants.Permissions.Endpoints.Authorization,
-            //                OpenIddictConstants.Permissions.Endpoints.Logout,
-            //                OpenIddictConstants.Permissions.Endpoints.Token,
-            //                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-            //                OpenIddictConstants.Permissions.GrantTypes.RefreshToken
-            //            }
-            //    };
-
-            //    await manager.CreateAsync(descriptor);
-            //}
-
             //if (await manager.FindByClientIdAsync("resource") == null)
             //{
             //    var descriptor = new OpenIddictApplicationDescriptor
@@ -107,6 +85,51 @@ namespace AuthServer.Infrastructure.Initialization
 
             //    await manager.CreateAsync(descriptor);
             //}
+
+            var mvcClient = await manager.FindByClientIdAsync("mvc_client");
+            if (mvcClient == null)
+            {
+                var descriptor = new OpenIddictApplicationDescriptor
+                {
+                    ClientId = "mvc_client",
+                    ClientSecret = "mvc_client_secret",
+                    DisplayName = "MVC Client application",
+                    PostLogoutRedirectUris = { new Uri("https://localhost:6001/signout-callback-oidc") },
+                    RedirectUris = { new Uri("https://localhost:6001/signin-oidc") },
+                    Permissions =
+                        {
+                            OpenIddictConstants.Permissions.Endpoints.Authorization,
+                            OpenIddictConstants.Permissions.Endpoints.Logout,
+                            OpenIddictConstants.Permissions.Endpoints.Token,
+                            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                            OpenIddictConstants.Permissions.GrantTypes.RefreshToken
+                        }
+                };
+
+                foreach (var scope in scopes.GetScopes())
+                {
+                    descriptor.Permissions.Add($"scp:{scope}");
+                }
+
+                await manager.CreateAsync(descriptor);
+            }
+            else
+            {
+                var permissions = new JArray(
+                    OpenIddictConstants.Permissions.Endpoints.Authorization,
+                    OpenIddictConstants.Permissions.Endpoints.Logout,
+                    OpenIddictConstants.Permissions.Endpoints.Token,
+                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
+
+                foreach (var scope in scopes.GetScopes())
+                {
+                    permissions.Add($"scp:{scope}");
+                }
+
+                mvcClient.Permissions = JsonConvert.SerializeObject(permissions);
+                await manager.UpdateAsync(mvcClient);
+            }
 
             var swagger = await manager.FindByClientIdAsync("swagger");
             if (swagger == null)
