@@ -22,8 +22,9 @@ namespace Client.Controllers
         }
 
         [HttpGet("~/")]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
+            await LoadTokens();
             return View();
         }
 
@@ -37,12 +38,13 @@ namespace Client.Controllers
                                                     "Make sure that SaveTokens is set to true in the OIDC options.");
             }
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:54540/api/message");
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:4001/api/values");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
+            await LoadTokens();
             return View((object)await response.Content.ReadAsStringAsync());
         }
 
@@ -53,6 +55,13 @@ namespace Client.Controllers
             {
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
             });
+        }
+
+        private async Task LoadTokens()
+        {
+            ViewData["access_token"] = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "access_token");
+            ViewData["id_token"] = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "id_token");
+            ViewData["refresh_token"] = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "refresh_token");
         }
     }
 }

@@ -61,6 +61,7 @@ namespace Client
 
                     options.Scope.Add("email");
                     options.Scope.Add("profile");
+
                     options.Scope.Add("phone");
                     options.Scope.Add("roles");
 
