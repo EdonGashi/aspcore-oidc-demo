@@ -94,8 +94,8 @@ namespace AuthServer.Infrastructure.Initialization
                     ClientId = "mvc_client",
                     ClientSecret = "mvc_client_secret",
                     DisplayName = "MVC Client application",
-                    PostLogoutRedirectUris = { new Uri("https://localhost:6001/signout-callback-oidc") },
-                    RedirectUris = { new Uri("https://localhost:6001/signin-oidc") },
+                    PostLogoutRedirectUris = { new Uri("https://localhost:6001/external/logout") },
+                    RedirectUris = { new Uri("https://localhost:6001/external/login") },
                     Permissions =
                         {
                             OpenIddictConstants.Permissions.Endpoints.Authorization,
