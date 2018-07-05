@@ -171,6 +171,10 @@ namespace AuthServer
                     options.ClientSecret = "DNcjBC9fgcY0zUqRe7PYYo1q";
                     options.CallbackPath = "/connect/external/google";
                     options.AccessType = "offline";
+                    //options.Scope.Add("openid");
+                    //options.Scope.Add("profile");
+                    //options.Scope.Add("email");
+                    options.Scope.Add("https://www.googleapis.com/auth/user.birthday.read");
                     options.SaveTokens = true;
                 })
                 .AddJwtBearer(options =>
