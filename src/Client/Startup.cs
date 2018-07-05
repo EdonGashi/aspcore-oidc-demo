@@ -48,8 +48,7 @@ namespace Client
                     options.SaveTokens = true;
 
                     options.CallbackPath = "/external/login";
-                    options.RemoteSignOutPath = "/external/logout";
-                    options.SignedOutCallbackPath = "/";
+                    options.SignedOutCallbackPath = "/external/logout";
                     
                     // Use the authorization code flow.
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -61,6 +60,8 @@ namespace Client
                     options.Authority = Configuration["Tokens:Issuer"];
 
                     options.Scope.Add("email");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("phone");
                     options.Scope.Add("roles");
 
                     options.SecurityTokenValidator = new JwtSecurityTokenHandler

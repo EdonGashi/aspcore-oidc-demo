@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AuthServer.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -46,11 +47,17 @@ namespace AuthServer.V1.Controllers
                 ["claims"] = new JArray(User.Claims.Select(c => new JArray(c.Type, c.Value))),
                 ["tokens"] = new JObject
                 {
-                    ["Google"] = new JObject
+                    ["Identity_Google"] = new JObject
                     {
                         ["access_token"] = await userManager.GetAuthenticationTokenAsync(currentUser, "Google", "access_token"),
                         ["id_token"] = await userManager.GetAuthenticationTokenAsync(currentUser, "Google", "refresh_token"),
                         ["refresh_token"] = await userManager.GetAuthenticationTokenAsync(currentUser, "Google", "id_token")
+                    },
+                    ["HttpContext_Google"] = new JObject
+                    {
+                        ["access_token"] = await HttpContext.GetTokenAsync("Google", "access_token"),
+                        ["id_token"] = await HttpContext.GetTokenAsync("Google", "refresh_token"),
+                        ["refresh_token"] = await HttpContext.GetTokenAsync("Google", "id_token")
                     }
                 },
                 ["identities"] = identities

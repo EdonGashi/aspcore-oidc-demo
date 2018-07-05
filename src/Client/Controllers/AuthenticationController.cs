@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Client.Controllers
@@ -8,7 +9,7 @@ namespace Client.Controllers
         [HttpGet("~/login")]
         public ActionResult SignIn()
         {
-            return Challenge("AuthServer");
+            return Challenge(new AuthenticationProperties { RedirectUri = "/" }, "AuthServer");
         }
 
         [HttpGet("~/logout"), HttpPost("~/logout")]
