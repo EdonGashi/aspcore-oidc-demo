@@ -64,6 +64,7 @@ namespace Client
 
                     options.Scope.Add("phone");
                     options.Scope.Add("roles");
+                    options.Scope.Add("values.read");
 
                     options.SecurityTokenValidator = new JwtSecurityTokenHandler
                     {

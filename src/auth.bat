@@ -1,0 +1,2 @@
+cd AuthServer
+dotnet run

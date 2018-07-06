@@ -1,44 +1,64 @@
 ﻿using System.Collections.Generic;
+using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ResourceServer.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
+    [ApiController, ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class ValuesController : ControllerBase
     {
+        private static readonly Dictionary<string, string> Store = new Dictionary<string, string>();
+
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        [Authorize("values.read")]
+        public ActionResult<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            var sub = GetSub();
+            if (sub == null)
+            {
+                return BadRequest();
+            }
+
+            return Store.TryGetValue(sub, out var result)
+                ? result
+                : "Success [Empty value].";
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        // GET api/values/{sub}
+        [HttpGet("{sub}")]
+        [Authorize("values.write", Roles = "administrator")]
+        public ActionResult<string> GetForUser([FromRoute] string sub)
         {
-            return "value";
+            if (string.IsNullOrEmpty(sub))
+            {
+                return BadRequest();
+            }
+
+            return Store.TryGetValue(sub, out var result)
+                ? result
+                : "Success [Empty value].";
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // PUT api/values/{sub}
+        [HttpPut("{sub}")]
+        [Authorize("values.write", Roles = "administrator")]
+        public IActionResult Post([FromRoute] string sub, [FromBody] string value)
         {
+            if (string.IsNullOrEmpty(sub) || string.IsNullOrEmpty(value))
+            {
+                return BadRequest();
+            }
+
+            Store[sub] = value;
+            return Ok();
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        private string GetSub()
         {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return HttpContext.User?.FindFirst(OpenIdConnectConstants.Claims.Subject).Value;
         }
     }
 }

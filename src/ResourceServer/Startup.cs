@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using Utils.Authorization;
 using Utils.Documentation;
 
 namespace ResourceServer
@@ -63,6 +64,16 @@ namespace ResourceServer
                         ValidateLifetime = true
                     };
                 });
+
+            services.AddAuthorization();
+            services.AddImplicitScopePolicy();
+            ConfigureServicesApiExplorer(services, new List<string>
+            {
+                "openid",
+                "profile",
+                "email",
+                "values"
+            });
         }
 
         private void ConfigureServicesApiExplorer(IServiceCollection services, List<string> scopes)
@@ -90,15 +101,6 @@ namespace ResourceServer
                     Type = "apiKey"
                 });
 
-                options.AddSecurityDefinition("oauth2", new OAuth2Scheme
-                {
-                    Type = "oauth2",
-                    Flow = "implicit",
-                    AuthorizationUrl = "/connect/authorize",
-                    TokenUrl = "/connect/token",
-                    Scopes = scopes.ToDictionary(s => s, s => s)
-                });
-
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
                 options.DocumentFilter<LowercaseDocumentFilter>();
 
@@ -124,7 +126,10 @@ namespace ResourceServer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(
+            IApplicationBuilder app, 
+            IHostingEnvironment env,
+            IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -142,6 +147,15 @@ namespace ResourceServer
 
             app.UseAuthentication();
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                foreach (var description in provider.ApiVersionDescriptions)
+                {
+                    options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                }
+            });
         }
     }
 }

@@ -31,6 +31,10 @@ namespace AuthServer
             public const string ApplicationRead = "app.read";
 
             public const string ApplicationWrite = "app.write";
+
+            public const string ValuesRead = "values.read";
+
+            public const string ValuesWrite = "values.write";
         }
 
         public static class Roles
