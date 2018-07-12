@@ -71,20 +71,22 @@ namespace AuthServer.Infrastructure.Initialization
             //    await manager.CreateAsync(descriptor);
             //}
 
-            //if (await manager.FindByClientIdAsync("resource") == null)
-            //{
-            //    var descriptor = new OpenIddictApplicationDescriptor
-            //    {
-            //        ClientId = "resource",
-            //        ClientSecret = "resource_secret",
-            //        Permissions =
-            //        {
-            //            OpenIddictConstants.Permissions.Endpoints.Introspection
-            //        }
-            //    };
+            var resourceServer = await manager.FindByClientIdAsync("resource_server");
+            if (resourceServer == null)
+            {
+                var descriptor = new OpenIddictApplicationDescriptor
+                {
+                    ClientId = "resource_server",
+                    ClientSecret = "resource_server_secret",
+                    Permissions =
+                    {
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
+                    }
+                };
 
-            //    await manager.CreateAsync(descriptor);
-            //}
+                await manager.CreateAsync(descriptor);
+            }
 
             var mvcClient = await manager.FindByClientIdAsync("mvc_client");
             if (mvcClient == null)

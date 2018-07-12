@@ -18,6 +18,13 @@ namespace Utils.Authorization
                 return Task.CompletedTask;
             }
 
+            if (context.User.HasClaim(OpenIdConnectConstants.Claims.Subject, "resource_server")
+                && context.User.IsInRole("application"))
+            {
+                context.Succeed(requirement);
+                return Task.CompletedTask;
+            }
+
             var scopes = context.User.Claims
                 .Where(c => c.Type == OpenIdConnectConstants.Claims.Scope && (requirement.Issuer == null || c.Issuer == requirement.Issuer))
                 .SelectMany(s => s.Value?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>());

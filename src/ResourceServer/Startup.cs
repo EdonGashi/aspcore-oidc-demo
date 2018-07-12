@@ -127,7 +127,7 @@ namespace ResourceServer
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
-            IApplicationBuilder app, 
+            IApplicationBuilder app,
             IHostingEnvironment env,
             IApiVersionDescriptionProvider provider)
         {
@@ -140,10 +140,8 @@ namespace ResourceServer
                 app.UseHsts();
             }
 
-            if (!Environment.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseMvc();

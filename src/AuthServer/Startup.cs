@@ -137,6 +137,7 @@ namespace AuthServer
                         .AllowAuthorizationCodeFlow()
                         .AllowPasswordFlow()
                         .AllowImplicitFlow()
+                        .AllowClientCredentialsFlow()
                         .AllowRefreshTokenFlow();
 
                     // When request caching is enabled, authorization and logout requests
