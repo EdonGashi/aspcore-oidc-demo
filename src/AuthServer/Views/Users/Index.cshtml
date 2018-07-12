@@ -1,0 +1,40 @@
+﻿@model List<UserViewModel>
+
+@{
+  ViewData["Title"] = "Users";
+}
+
+<br />
+<h2>Users</h2>
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Email</th>
+      <th>Roles</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var user in Model)
+    {
+      <tr>
+        <td>@user.Id</td>
+        <td>@user.Email</td>
+        <td>@user.Roles</td>
+        <td>
+          @if (!user.IsAdmin)
+          {
+            <form method="post" asp-area="" asp-controller="Users" asp-action="Delete">
+              <input name="id" type="hidden" value="@user.Id" />
+              <button type="submit" class="btn btn-xs btn-danger">Delete</button>
+            </form>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+<br />
+<a class="btn btn-info" asp-area="" asp-controller="Users" asp-action="Create">Create new</a>

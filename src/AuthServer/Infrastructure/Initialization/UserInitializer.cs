@@ -24,6 +24,8 @@ namespace AuthServer.Infrastructure.Initialization
         {
             await AddRole(AppConstants.Roles.Administrator);
             await AddRole(AppConstants.Roles.Application);
+            await AddRole(AppConstants.Roles.Teacher);
+            await AddRole(AppConstants.Roles.Student);
             await AddDefaultUser();
         }
 

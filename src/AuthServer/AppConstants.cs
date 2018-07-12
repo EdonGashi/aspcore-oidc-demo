@@ -39,9 +39,13 @@ namespace AuthServer
 
         public static class Roles
         {
+            public const string Application = "application";
+
             public const string Administrator = "administrator";
 
-            public const string Application = "application";
+            public const string Teacher = "teacher";
+
+            public const string Student = "student";
         }
 
         public static string AdminEmail = "admin@authserver";
