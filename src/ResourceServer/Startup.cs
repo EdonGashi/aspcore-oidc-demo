@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AuthServer.Infrastructure;
@@ -22,6 +23,21 @@ namespace ResourceServer
 {
     public class Startup
     {
+        private static string Join(string domain, string path)
+        {
+            if (domain.EndsWith("/"))
+            {
+                domain = domain.Substring(0, domain.Length - 1);
+            }
+
+            if (path.StartsWith("/"))
+            {
+                path = path.Substring(1);
+            }
+
+            return domain + "/" + path;
+        }
+
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
@@ -67,6 +83,14 @@ namespace ResourceServer
 
             services.AddAuthorization();
             services.AddImplicitScopePolicy();
+            var httpClient = new HttpClient();
+            services.AddSingleton(httpClient);
+            services.AddSingleton<ITokenProvider>(new ClientCredentialsAuthenticator(
+                "resource_server",
+                "resource_server_secret",
+                httpClient,
+                Join(Configuration["Tokens:Issuer"], "/connect/token")));
+
             ConfigureServicesApiExplorer(services, new List<string>
             {
                 "openid",
