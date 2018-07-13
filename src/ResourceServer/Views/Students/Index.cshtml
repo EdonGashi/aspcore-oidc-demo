@@ -1,0 +1,36 @@
+﻿@using ResourceServer.Services
+@model IEnumerable<UserResult>
+
+@{
+  ViewData["Title"] = "Students";
+}
+
+<br />
+<h2>Students</h2>
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Email</th>
+      <th>Roles</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var user in Model)
+    {
+      <tr>
+        <td>@user.Subject</td>
+        <td>@user.Email</td>
+        <td>@string.Join(", ", user.Roles)</td>
+        <td>
+          @if (User.IsInRole("teacher"))
+          {
+            <a asp-area="" asp-controller="Grades" asp-action="Index" asp-route-id="@user.Subject" class="btn btn-xs btn-info">Grades</a>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

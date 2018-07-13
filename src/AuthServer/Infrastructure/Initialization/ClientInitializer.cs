@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AuthServer.Data;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenIddict.Abstractions;
@@ -36,17 +37,20 @@ namespace AuthServer.Infrastructure.Initialization
         private readonly ApplicationDbContext context;
         private readonly OpenIddictApplicationManager<OpenIddictApplication> manager;
         private readonly IScopeCollection scopes;
+        private readonly IConfiguration configuration;
 
         public ClientInitializer(
             IAddressResolver addressResolver,
             ApplicationDbContext context,
             OpenIddictApplicationManager<OpenIddictApplication> manager,
-            IScopeCollection scopes)
+            IScopeCollection scopes,
+            IConfiguration configuration)
         {
             this.addressResolver = addressResolver;
             this.context = context;
             this.manager = manager;
             this.scopes = scopes;
+            this.configuration = configuration;
         }
 
         public async Task InitializeAsync()
@@ -96,16 +100,16 @@ namespace AuthServer.Infrastructure.Initialization
                     ClientId = "mvc_client",
                     ClientSecret = "mvc_client_secret",
                     DisplayName = "MVC Client application",
-                    PostLogoutRedirectUris = { new Uri("https://localhost:6001/external/logout") },
-                    RedirectUris = { new Uri("https://localhost:6001/external/login") },
+                    PostLogoutRedirectUris = { new Uri($"{configuration["Client:BaseUrl"]}external/logout") },
+                    RedirectUris = { new Uri($"{configuration["Client:BaseUrl"]}external/login") },
                     Permissions =
-                        {
-                            OpenIddictConstants.Permissions.Endpoints.Authorization,
-                            OpenIddictConstants.Permissions.Endpoints.Logout,
-                            OpenIddictConstants.Permissions.Endpoints.Token,
-                            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                            OpenIddictConstants.Permissions.GrantTypes.RefreshToken
-                        }
+                    {
+                        OpenIddictConstants.Permissions.Endpoints.Authorization,
+                        OpenIddictConstants.Permissions.Endpoints.Logout,
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken
+                    }
                 };
 
                 foreach (var scope in scopes.GetScopes())

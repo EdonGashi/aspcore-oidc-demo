@@ -1,43 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
-using AuthServer.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using ResourceServer.Data;
+using ResourceServer.Infrastructure;
+using ResourceServer.Services;
 using Swashbuckle.AspNetCore.Swagger;
 using Utils.Authorization;
 using Utils.Documentation;
+using Utils.Helpers;
 
 namespace ResourceServer
 {
     public class Startup
     {
-        private static string Join(string domain, string path)
-        {
-            if (domain.EndsWith("/"))
-            {
-                domain = domain.Substring(0, domain.Length - 1);
-            }
-
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
-
-            return domain + "/" + path;
-        }
-
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
@@ -52,17 +44,70 @@ namespace ResourceServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
+            if (Environment.IsDevelopment())
+            {
+                services
+                    .AddDataProtection()
+                    .PersistKeysToFileSystem(GetKeyRingDirInfo())
+                    .SetApplicationName("auth_server");
+            }
+            else
+            {
+                services
+                    .AddDataProtection()
+                    .ProtectKeysWithCertificate(Configuration["CookieProtection:Thumbprint"]
+                                                ?? throw new InvalidOperationException("Could not find key protection certificate."));
+            }
+
             services
-                .AddAuthentication(options =>
+                .AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddCookie(IdentityConstants.ApplicationScheme, options =>
                 {
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.Cookie.Name = "auth";
+                    options.LoginPath = "/home/login";
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api") &&
+                            context.Response.StatusCode == StatusCodes.Status200OK)
+                        {
+                            context.Response.Clear();
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect(context.RedirectUri);
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnRedirectToAccessDenied = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api") &&
+                            context.Response.StatusCode == StatusCodes.Status200OK)
+                        {
+                            context.Response.Clear();
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect(context.RedirectUri);
+                        return Task.CompletedTask;
+                    };
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = Configuration["Tokens:Issuer"];
+                    options.Authority = Configuration["AuthServer:BaseUrl"];
                     options.Audience = "resource_server";
                     options.RequireHttpsMetadata = !Environment.IsDevelopment();
                     options.IncludeErrorDetails = true;
@@ -72,7 +117,7 @@ namespace ResourceServer
                         NameClaimType = OpenIdConnectConstants.Claims.Subject,
                         RoleClaimType = OpenIdConnectConstants.Claims.Role,
                         ValidateIssuer = true,
-                        ValidIssuer = Configuration["Tokens:Issuer"],
+                        ValidIssuer = Configuration["AuthServer:BaseUrl"],
                         ValidateAudience = true,
                         ValidAudience = "resource_server",
                         RequireSignedTokens = true,
@@ -85,22 +130,34 @@ namespace ResourceServer
             services.AddImplicitScopePolicy();
             var httpClient = new HttpClient();
             services.AddSingleton(httpClient);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
             services.AddSingleton<ITokenProvider>(new ClientCredentialsAuthenticator(
                 "resource_server",
                 "resource_server_secret",
                 httpClient,
-                Join(Configuration["Tokens:Issuer"], "/connect/token")));
+                PathUtils.Join(Configuration["AuthServer:BaseUrl"], "/connect/token")));
+            services.AddSingleton<IStudentsService, StudentsService>();
 
-            ConfigureServicesApiExplorer(services, new List<string>
+            ConfigureServicesApiExplorer(services);
+            ConfigureServicesDatabase(services);
+        }
+
+        private void ConfigureServicesDatabase(IServiceCollection services)
+        {
+            var dbPath = Configuration["DB_PATH"];
+            if (string.IsNullOrEmpty(dbPath))
             {
-                "openid",
-                "profile",
-                "email",
-                "values"
+                throw new InvalidOperationException("DB_PATH musit be set to a valid path.");
+            }
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlite($"Data Source={dbPath};");
             });
         }
 
-        private void ConfigureServicesApiExplorer(IServiceCollection services, List<string> scopes)
+        private void ConfigureServicesApiExplorer(IServiceCollection services)
         {
             services.AddMvcCore().AddVersionedApiExplorer(options =>
             {
@@ -152,23 +209,31 @@ namespace ResourceServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env,
             IApiVersionDescriptionProvider provider)
         {
-            if (env.IsDevelopment())
+            if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
+                app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseAuthentication();
-            app.UseMvc();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -178,6 +243,24 @@ namespace ResourceServer
                     options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
                 }
             });
+        }
+
+        private DirectoryInfo GetKeyRingDirInfo()
+        {
+            var applicationBasePath = AppContext.BaseDirectory;
+            var directoryInfo = new DirectoryInfo(applicationBasePath);
+            do
+            {
+                directoryInfo = directoryInfo.Parent;
+                var keyRingDirectoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "KeyRing"));
+                if (keyRingDirectoryInfo.Exists)
+                {
+                    return keyRingDirectoryInfo;
+                }
+            }
+            while (directoryInfo.Parent != null);
+
+            throw new Exception($"KeyRing folder could not be located using the application root {applicationBasePath}.");
         }
     }
 }

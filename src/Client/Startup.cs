@@ -57,7 +57,7 @@ namespace Client
                     // Note: setting the Authority allows the OIDC client middleware to automatically
                     // retrieve the identity provider's configuration and spare you from setting
                     // the different endpoints URIs or the token validation parameters explicitly.
-                    options.Authority = Configuration["Tokens:Issuer"];
+                    options.Authority = Configuration["AuthServer:BaseUrl"];
 
                     options.Scope.Add("email");
                     options.Scope.Add("profile");

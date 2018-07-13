@@ -1,0 +1,24 @@
+@using Microsoft.Extensions.Configuration
+@using Utils.Helpers
+@inject IConfiguration Configuration
+
+@if (User.Identity.IsAuthenticated)
+{
+  <form asp-area="" asp-controller="Home" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
+    <ul class="nav navbar-nav navbar-right">
+      <li>
+        <a href="@PathUtils.Join(Configuration["AuthServer:BaseUrl"], Configuration["AuthServer:ProfilePath"])" title="Manage">Hello @User.Identity.Name!</a>
+      </li>
+      <li>
+        <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
+      </li>
+    </ul>
+  </form>
+}
+else
+{
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="@PathUtils.Join(Configuration["AuthServer:BaseUrl"], Configuration["AuthServer:RegisterPath"])">Register</a></li>
+    <li><a asp-area="" asp-controller="Home" asp-action="Login">Login</a></li>
+  </ul>
+}

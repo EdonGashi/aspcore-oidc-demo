@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ViewData["Title"] - Account Server</title>
+  <title>@ViewData["Title"] - Resource Server</title>
 
   <environment include="Development">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -29,14 +29,18 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Account Server</a>
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Resource Server</a>
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li><a href="@Configuration["ResourceServer:BaseUrl"]">Resource Server</a></li>
+          <li><a href="@Configuration["AuthServer:BaseUrl"]">Account Server</a></li>
+          @if (User.IsInRole("administrator") || User.IsInRole("teacher"))
+          {
+            <li><a asp-area="" asp-controller="Students" asp-action="Index">View Students</a></li>
+          }
           @if (User.IsInRole("administrator"))
           {
-            <li><a asp-area="" asp-controller="Users" asp-action="Index">Manage Users</a></li>
+            <li><a asp-area="" asp-controller="Subjects" asp-action="Index">Manage Subjects</a></li>
           }
         </ul>
         <partial name="_LoginPartial" />

@@ -24,7 +24,7 @@ namespace Utils.Authorization
                 return policy;
             }
 
-            var requirement = new HasScopeRequirement(policyName, configuration["Tokens:Issuer"]);
+            var requirement = new HasScopeRequirement(policyName, configuration["AuthServer:BaseUrl"]);
             var builder = new AuthorizationPolicyBuilder()
                 .AddRequirements(requirement);
 

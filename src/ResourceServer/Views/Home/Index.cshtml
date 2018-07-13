@@ -1,0 +1,40 @@
+﻿@using Microsoft.Extensions.Configuration
+@using Utils.Helpers
+@inject IConfiguration Configuration
+
+@{
+  ViewData["Title"] = "Home Page";
+}
+
+<div class="jumbotron">
+  @if (User?.Identity?.IsAuthenticated ?? false)
+  {
+    <h2>Welcome, @User.Identity.Name</h2>
+    <p>We know these facts about you:</p>
+    <p>
+      @foreach (var claim in Context.User.Claims)
+      {
+        <div>@claim.Type: <b>@claim.Value</b></div>
+      }
+    </p>
+
+    if (ViewData["has_tokens"] is true)
+    {
+      <p>
+        <div>access_token: <b>@ViewData["access_token"]</b></div>
+        <div>id_token: <b>@ViewData["id_token"]</b></div>
+        <div>refresh_token: <b>@ViewData["refresh_token"]</b></div>
+      </p>
+    }
+
+    <form asp-area="" asp-controller="Home" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+      <button class="btn btn-info" type="submit">Sign out</button>
+    </form>
+  }
+  else
+  {
+    <h2>You are not signed in.</h2>
+    <a class="btn btn-info" href="@PathUtils.Join(Configuration["AuthServer:BaseUrl"], Configuration["AuthServer:RegisterPath"])">Register</a>
+    <a class="btn btn-success" asp-area="" asp-controller="Home" asp-action="Login">Sign in</a>
+  }
+</div>

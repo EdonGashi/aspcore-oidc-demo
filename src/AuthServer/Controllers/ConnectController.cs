@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using OpenIddict.EntityFrameworkCore.Models;
+using Utils;
 using Utils.Mvc;
 
 namespace AuthServer.Controllers
@@ -236,7 +237,7 @@ namespace AuthServer.Controllers
                 OpenIdConnectConstants.Destinations.AccessToken,
                 OpenIdConnectConstants.Destinations.IdentityToken);
 
-            identity.AddClaim(OpenIdConnectConstants.Claims.Name, application.DisplayName,
+            identity.AddClaim(OpenIdConnectConstants.Claims.Name, application.DisplayName ?? application.ClientId,
                 OpenIdConnectConstants.Destinations.AccessToken,
                 OpenIdConnectConstants.Destinations.IdentityToken);
 

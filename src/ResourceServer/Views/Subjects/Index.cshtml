@@ -1,0 +1,38 @@
+﻿@using ResourceServer.Data
+@model IEnumerable<Subject>
+
+@{
+  ViewData["Title"] = "Subjects";
+}
+
+<br />
+<h2>Subjects</h2>
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Name</th>
+      <th>ECTS</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var subject in Model)
+    {
+      <tr>
+        <td>@subject.Id</td>
+        <td>@subject.Name</td>
+        <td>@subject.Ects</td>
+        <td>
+          <form method="post" asp-area="" asp-controller="Subjects" asp-action="Delete">
+            <input name="id" type="hidden" value="@subject.Id" />
+            <button type="submit" class="btn btn-xs btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+<br />
+<a class="btn btn-info" asp-area="" asp-controller="Subjects" asp-action="Create">Create new</a>

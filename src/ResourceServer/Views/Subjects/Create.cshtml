@@ -1,0 +1,24 @@
+﻿@model ResourceServer.Data.Subject
+
+@{
+  ViewData["Title"] = "Create subject";
+}
+
+<br />
+<h2>Create subject</h2>
+<br />
+
+<form method="post" asp-area="" asp-controller="Subjects" asp-action="Create">
+  <div asp-validation-summary="All" class="text-danger"></div>
+  <div class="form-group">
+    <label asp-for="Name"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+  </div>
+  <div class="form-group">
+    <label asp-for="Ects"></label>
+    <input asp-for="Ects" class="form-control" />
+    <span asp-validation-for="Ects" class="text-danger"></span>
+  </div>
+  <button type="submit" class="btn btn-default">Create</button>
+</form>

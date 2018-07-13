@@ -24,6 +24,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
+using Utils;
 using Utils.Authorization;
 using Utils.Documentation;
 using Utils.Security;
@@ -51,7 +52,7 @@ namespace AuthServer
                 .Select(f => (string)f.GetRawConstantValue())
                 .ToList();
 
-            var address = new AddressResolver(Configuration["Tokens:Issuer"]);
+            var address = new AddressResolver(Configuration["AuthServer:BaseUrl"]);
             services.AddSingleton<IAddressResolver>(address);
             services.AddSingleton<IScopeCollection>(new ScopeCollection(scopes));
 
@@ -165,7 +166,6 @@ namespace AuthServer
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             services
                 .AddAuthentication()
-                .AddCookie()
                 .AddGoogle(options =>
                 {
                     options.ClientId = "773091501856-uvv6htap67gve64j05dppf6kii6ues3m.apps.googleusercontent.com";
@@ -180,7 +180,7 @@ namespace AuthServer
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = Configuration["Tokens:Issuer"];
+                    options.Authority = Configuration["AuthServer:BaseUrl"];
                     options.Audience = "resource_server";
                     options.RequireHttpsMetadata = !Environment.IsDevelopment();
                     options.IncludeErrorDetails = true;
@@ -190,7 +190,7 @@ namespace AuthServer
                         NameClaimType = OpenIdConnectConstants.Claims.Subject,
                         RoleClaimType = OpenIdConnectConstants.Claims.Role,
                         ValidateIssuer = true,
-                        ValidIssuer = Configuration["Tokens:Issuer"],
+                        ValidIssuer = Configuration["AuthServer:BaseUrl"],
                         ValidateAudience = true,
                         ValidAudience = "resource_server",
                         RequireSignedTokens = true,

@@ -1,8 +1,7 @@
 ﻿using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.Extensions.Configuration;
-using OpenIddict.Abstractions;
 
-namespace AuthServer
+namespace Utils
 {
     public static class AppConstants
     {
@@ -26,11 +25,13 @@ namespace AuthServer
 
             public const string Phone = OpenIdConnectConstants.Scopes.Phone;
 
-            public const string Roles = OpenIddictConstants.Scopes.Roles;
+            public const string Roles = "roles";
 
             public const string ApplicationRead = "app.read";
 
             public const string ApplicationWrite = "app.write";
+
+            public const string UsersRead = "users.read";
 
             public const string ValuesRead = "values.read";
 

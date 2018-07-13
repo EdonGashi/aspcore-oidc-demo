@@ -1,11 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AuthServer.Models;
+using AuthServer.V1.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using OpenIddict.Abstractions;
+using Utils;
 using Utils.Authorization;
 
 namespace AuthServer.V1.Controllers
@@ -21,9 +25,33 @@ namespace AuthServer.V1.Controllers
             this.userManager = userManager;
         }
 
-        [Authorize(Roles = AppConstants.Roles.Administrator)]
+        [Authorize(AppConstants.Scopes.UsersRead, Roles = AppConstants.Roles.Administrator)]
+        [HttpGet, Produces("application/json")]
+        public async Task<ActionResult<List<UserResult>>> GetUsers([FromQuery] string role)
+        {
+            if (string.IsNullOrEmpty(role))
+            {
+                return BadRequest();
+            }
+
+            var users = await userManager.GetUsersInRoleAsync(role);
+            var result = new List<UserResult>(users.Count);
+            foreach (var user in users)
+            {
+                result.Add(new UserResult
+                {
+                    Subject = user.Id,
+                    Email = user.Email,
+                    Roles = (await userManager.GetRolesAsync(user)).ToList()
+                });
+            }
+
+            return result;
+        }
+
+        [Authorize(AppConstants.Scopes.UsersRead, Roles = AppConstants.Roles.Administrator)]
         [HttpGet("{id}"), Produces("application/json")]
-        public async Task<IActionResult> GetUserInfo([FromRoute] string id)
+        public async Task<ActionResult<UserResult>> GetUserInfo([FromRoute] string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -36,17 +64,12 @@ namespace AuthServer.V1.Controllers
                 return NotFound();
             }
 
-            var claims = new JObject
+            return new UserResult
             {
-                [OpenIdConnectConstants.Claims.Subject] = await userManager.GetUserIdAsync(user),
-                [OpenIdConnectConstants.Claims.Email] = await userManager.GetEmailAsync(user),
-                [OpenIdConnectConstants.Claims.EmailVerified] = await userManager.IsEmailConfirmedAsync(user),
-                [OpenIdConnectConstants.Claims.PhoneNumber] = await userManager.GetPhoneNumberAsync(user),
-                [OpenIdConnectConstants.Claims.PhoneNumberVerified] = await userManager.IsPhoneNumberConfirmedAsync(user),
-                [OpenIddictConstants.Scopes.Roles] = JArray.FromObject(await userManager.GetRolesAsync(user))
+                Subject = await userManager.GetUserIdAsync(user),
+                Email = await userManager.GetEmailAsync(user),
+                Roles = (await userManager.GetRolesAsync(user)).ToList()
             };
-
-            return Json(claims);
         }
 
         /// <summary>

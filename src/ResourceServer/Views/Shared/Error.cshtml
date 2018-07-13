@@ -1,0 +1,14 @@
+﻿@model ResourceServer.Models.ErrorViewModel
+@{
+	ViewData["Title"] = "Error";
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+	<h2>@Model.Error</h2>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorDescription))
+{
+	<p>@Model.ErrorDescription</p>
+}

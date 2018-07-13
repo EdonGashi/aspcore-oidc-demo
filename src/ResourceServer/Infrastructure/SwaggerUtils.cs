@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace AuthServer.Infrastructure
+namespace ResourceServer.Infrastructure
 {
     internal static class SwaggerUtils
     {

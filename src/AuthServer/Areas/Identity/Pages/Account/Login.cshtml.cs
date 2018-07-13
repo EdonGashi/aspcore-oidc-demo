@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Utils.Helpers;
 
 namespace AuthServer.Areas.Identity.Pages.Account
 {
@@ -17,11 +19,13 @@ namespace AuthServer.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly IConfiguration _configuration;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [BindProperty]
@@ -30,6 +34,8 @@ namespace AuthServer.Areas.Identity.Pages.Account
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public string ReturnUrl { get; set; }
+
+        public string ReturnServer { get; set; }
 
         [TempData]
         public string ErrorMessage { get; set; }
@@ -48,14 +54,21 @@ namespace AuthServer.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string server = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
-            returnUrl = returnUrl ?? Url.Content("~/");
+            if (server == "resource_server")
+            {
+                returnUrl = returnUrl ?? "";
+            }
+            else
+            {
+                returnUrl = returnUrl ?? Url.Content("~/");
+            }
 
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -63,11 +76,19 @@ namespace AuthServer.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+            ReturnServer = server;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string server = null)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            if (server == "resource_server")
+            {
+                returnUrl = returnUrl ?? "";
+            }
+            else
+            {
+                returnUrl = returnUrl ?? Url.Content("~/");
+            }
 
             if (ModelState.IsValid)
             {
@@ -77,6 +98,11 @@ namespace AuthServer.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    if (server == "resource_server")
+                    {
+                        return Redirect(PathUtils.Join(_configuration["ResourceServer:BaseUrl"], returnUrl));
+                    }
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

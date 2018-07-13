@@ -8,6 +8,8 @@ namespace Utils.Authorization
 {
     public class ClientCredentialsAuthenticator : ITokenProvider
     {
+        private object refresh = new object();
+
         private readonly string clientId;
         private readonly string clientSecret;
         private readonly HttpClient httpClient;

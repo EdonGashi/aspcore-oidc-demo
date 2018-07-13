@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AuthServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Utils;
 using Utils.Initialization;
 
 namespace AuthServer.Infrastructure.Initialization
