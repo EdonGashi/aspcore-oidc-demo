@@ -27,15 +27,10 @@ namespace AuthServer.V1.Controllers
 
         [Authorize(AppConstants.Scopes.UsersRead, Roles = AppConstants.Roles.Administrator)]
         [HttpGet, Produces("application/json")]
-        public async Task<ActionResult<List<UserResult>>> GetUsers([FromQuery] string role)
+        public async Task<ActionResult<List<UserResult>>> GetUsers()
         {
-            if (string.IsNullOrEmpty(role))
-            {
-                return BadRequest();
-            }
-
-            var users = await userManager.GetUsersInRoleAsync(role);
-            var result = new List<UserResult>(users.Count);
+            var result = new List<UserResult>();
+            var users = userManager.Users;
             foreach (var user in users)
             {
                 result.Add(new UserResult

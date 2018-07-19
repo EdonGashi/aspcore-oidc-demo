@@ -46,13 +46,11 @@ namespace ResourceServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete([FromForm] int id)
         {
-            var subject = await dbContext.Subjects.FindAsync(id);
-            if (subject == null)
+            dbContext.Subjects.Remove(new Subject
             {
-                return RedirectToAction(nameof(Index));
-            }
+                Id = id
+            });
 
-            dbContext.Subjects.Remove(subject);
             await dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -1,0 +1,30 @@
+﻿@using System.Collections
+@model ResourceServer.Data.Course
+
+@{
+  ViewData["Title"] = "Create course";
+}
+
+<br />
+<h2>Create subject</h2>
+<br />
+
+<form method="post" asp-area="" asp-controller="Courses" asp-action="Create">
+  <div asp-validation-summary="All" class="text-danger"></div>
+  <div class="form-group">
+    <label asp-for="SubjectId"></label>
+    <select asp-for="SubjectId"
+            asp-items="@(new SelectList((IEnumerable)ViewData["subjects"], "Id", "Name", Model.SubjectId))"
+            class="form-control">
+    </select>
+    <span asp-validation-for="SubjectId" class="text-danger"></span>
+  </div>
+  <div class="form-group">
+    <label asp-for="TeacherId"></label>
+    <select asp-for="TeacherId"
+            asp-items="@(new SelectList((IEnumerable)ViewData["teachers"], "Id", "Name", Model.TeacherId))"
+            class="form-control"></select>
+    <span asp-validation-for="TeacherId" class="text-danger"></span>
+  </div>
+  <button type="submit" class="btn btn-default">Create</button>
+</form>

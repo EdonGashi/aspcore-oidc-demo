@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Utils.Authorization;
 using Utils.Helpers;
 
@@ -24,36 +22,41 @@ namespace ResourceServer.Services
         public List<string> Roles { get; set; }
     }
 
-    public interface IStudentsService
+    public interface IUsersService
     {
-        Task<UserResult> GetStudentAsync(string id);
+        Task<UserResult> GetUserAsync(string id);
 
-        Task<IEnumerable<UserResult>> GetStudentsAsync();
+        Task<IEnumerable<UserResult>> GetUsersAsync();
     }
 
-    public class StudentsService : IStudentsService
+    public class UsersService : IUsersService
     {
         private readonly IConfiguration configuration;
         private readonly HttpClient httpClient;
         private readonly ITokenProvider tokenProvider;
 
-        public StudentsService(IConfiguration configuration, HttpClient httpClient, ITokenProvider tokenProvider)
+        public UsersService(IConfiguration configuration, HttpClient httpClient, ITokenProvider tokenProvider)
         {
             this.configuration = configuration;
             this.httpClient = httpClient;
             this.tokenProvider = tokenProvider;
         }
 
-        public async Task<UserResult> GetStudentAsync(string id)
+        public async Task<UserResult> GetUserAsync(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var url = PathUtils.Join(Endpoint, "/api/v1/users/", id);
             var response = await GetResourceAsync(url);
             return JsonConvert.DeserializeObject<UserResult>(response);
         }
 
-        public async Task<IEnumerable<UserResult>> GetStudentsAsync()
+        public async Task<IEnumerable<UserResult>> GetUsersAsync()
         {
-            var url = PathUtils.Join(Endpoint, "/api/v1/users?role=student");
+            var url = PathUtils.Join(Endpoint, "/api/v1/users");
             var response = await GetResourceAsync(url);
             return JsonConvert.DeserializeObject<List<UserResult>>(response);
         }

@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using Utils
 @inject IConfiguration Configuration
 
 <!DOCTYPE html>
@@ -34,13 +35,11 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li><a href="@Configuration["AuthServer:BaseUrl"]">Account Server</a></li>
-          @if (User.IsInRole("administrator") || User.IsInRole("teacher"))
+          @if (User.IsInRole(AppConstants.Roles.Administrator))
           {
-            <li><a asp-area="" asp-controller="Students" asp-action="Index">View Students</a></li>
-          }
-          @if (User.IsInRole("administrator"))
-          {
+            <li><a asp-area="" asp-controller="Import" asp-action="Index">Manage Users</a></li>
             <li><a asp-area="" asp-controller="Subjects" asp-action="Index">Manage Subjects</a></li>
+            <li><a asp-area="" asp-controller="Courses" asp-action="Index">Manage Courses</a></li>
           }
         </ul>
         <partial name="_LoginPartial" />

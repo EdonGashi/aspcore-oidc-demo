@@ -137,7 +137,7 @@ namespace ResourceServer
                 "resource_server_secret",
                 httpClient,
                 PathUtils.Join(Configuration["AuthServer:BaseUrl"], "/connect/token")));
-            services.AddSingleton<IStudentsService, StudentsService>();
+            services.AddSingleton<IUsersService, UsersService>();
 
             ConfigureServicesApiExplorer(services);
             ConfigureServicesDatabase(services);

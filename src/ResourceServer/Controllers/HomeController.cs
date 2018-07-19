@@ -23,7 +23,6 @@ namespace ResourceServer.Controllers
 
         public IActionResult Index()
         {
-            var user = User;
             return View();
         }
 
