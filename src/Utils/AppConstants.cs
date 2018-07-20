@@ -36,6 +36,8 @@ namespace Utils
             public const string ValuesRead = "values.read";
 
             public const string ValuesWrite = "values.write";
+
+            public const string TranscriptRead = "transcript.read";
         }
 
         public static class Roles

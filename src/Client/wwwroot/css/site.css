@@ -35,3 +35,16 @@ body {
         display: none;
     }
 }
+
+h2 {
+	margin-top: 0;
+	margin-bottom: 20px;
+}
+
+h3 {
+	margin-top: 0;
+}
+
+.well {
+	padding: 30px;
+}

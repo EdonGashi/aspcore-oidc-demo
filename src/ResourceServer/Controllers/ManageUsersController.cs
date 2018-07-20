@@ -13,12 +13,12 @@ namespace ResourceServer.Controllers
     [ApiVersionNeutral, ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = AppConstants.Roles.Administrator)]
     [Route("[controller]/[action]")]
-    public class ImportController : Controller
+    public class ManageUsersController : Controller
     {
         private readonly IUsersService usersService;
         private readonly ApplicationDbContext db;
 
-        public ImportController(IUsersService usersService, ApplicationDbContext db)
+        public ManageUsersController(IUsersService usersService, ApplicationDbContext db)
         {
             this.usersService = usersService;
             this.db = db;

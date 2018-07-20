@@ -1,0 +1,55 @@
+﻿@model Transcript
+@{
+  var isEligible = Model.IsEligibleForScholarship;
+}
+
+<div class="well">
+  @if (isEligible)
+  {
+    <h3>Congratulations, you are eligible to apply!</h3>
+  }
+  else
+  {
+    <h3>Sorry, you do not meet the minimum requirements.</h3>
+  }
+
+  <br />
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Subject</th>
+        <th>ECTS</th>
+        <th>Year</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var course in Model.Courses)
+      {
+        <tr>
+          <td>@course.Id</td>
+          <td>@course.Name</td>
+          <td>@course.Ects</td>
+          <td>@course.Year</td>
+          <td>@course.Grade</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <p>Average grade: @Model.AverageGrade</p>
+  <p>Total ECTS: @Model.TotalEcts</p>
+
+  @if (isEligible)
+  {
+    <form method="post" asp-area="" asp-controller="Home" asp-action="ConfirmApply">
+      <button class="btn btn-success" type="submit">Confirm application</button>
+    </form>
+  }
+  else
+  {
+    <a class="btn btn-info" asp-area="" asp-controller="Home" asp-action="Index">Go back</a>
+  }
+</div>
+

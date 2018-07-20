@@ -7,7 +7,7 @@
 }
 
 <br />
-<h2>@title - @Model.Enrollments.Count students</h2>
+<h2>@title - @Model.EnrolledStudents.Count students</h2>
 <br />
 <table class="table table-striped">
   <thead>
@@ -18,7 +18,7 @@
     </tr>
   </thead>
   <tbody>
-    @foreach (var enrollment in Model.Enrollments)
+    @foreach (var enrollment in Model.EnrolledStudents)
     {
       <tr>
         <td class="align-middle">@enrollment.Student.Name</td>
@@ -26,7 +26,7 @@
         <td class="align-middle">
           @if (enrollment.Grade == null)
           {
-            <form method="post" asp-area="" asp-controller="MyCourses" asp-action="SetGrade">
+            <form method="post" asp-area="" asp-controller="TeacherCourses" asp-action="SetGrade">
               <input name="id" type="hidden" value="@enrollment.Id" />
               <input type="number" name="grade" class="form-control" style="width: 100px; display: inline;" />
               <button type="submit" class="btn btn-sm btn-primary">Set grade</button>
@@ -34,7 +34,7 @@
           }
           else
           {
-            <form method="post" asp-area="" asp-controller="MyCourses" asp-action="RemoveGrade">
+            <form method="post" asp-area="" asp-controller="TeacherCourses" asp-action="RemoveGrade">
               <input name="id" type="hidden" value="@enrollment.Id" />
               <button type="submit" class="btn btn-xs btn-primary">Remove grade</button>
             </form>

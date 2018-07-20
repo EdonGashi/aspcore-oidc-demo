@@ -28,22 +28,22 @@
     <Content Update="Views\Home\NotRegistered.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Classes\Index.cshtml">
+    <Content Update="Views\StudentCourses\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\MyCourses\Details.cshtml">
+    <Content Update="Views\TeacherCourses\Details.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\MyCourses\Index.cshtml">
+    <Content Update="Views\TeacherCourses\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Courses\Create.cshtml">
+    <Content Update="Views\ManageCourses\Create.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Courses\Index.cshtml">
+    <Content Update="Views\ManageCourses\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Subjects\Create.cshtml">
+    <Content Update="Views\ManageSubjects\Create.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>

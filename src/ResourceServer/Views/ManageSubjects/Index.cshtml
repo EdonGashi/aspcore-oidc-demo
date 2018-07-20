@@ -25,7 +25,7 @@
         <td>@subject.Name</td>
         <td>@subject.Ects</td>
         <td>
-          <form method="post" asp-area="" asp-controller="Subjects" asp-action="Delete">
+          <form method="post" asp-area="" asp-controller="ManageSubjects" asp-action="Delete">
             <input name="id" type="hidden" value="@subject.Id" />
             <button type="submit" class="btn btn-xs btn-danger">Delete</button>
           </form>
@@ -35,4 +35,4 @@
   </tbody>
 </table>
 <br />
-<a class="btn btn-info" asp-area="" asp-controller="Subjects" asp-action="Create">Create new</a>
+<a class="btn btn-info" asp-area="" asp-controller="ManageSubjects" asp-action="Create">Create new</a>

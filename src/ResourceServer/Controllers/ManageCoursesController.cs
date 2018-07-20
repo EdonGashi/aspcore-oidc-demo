@@ -11,11 +11,11 @@ namespace ResourceServer.Controllers
     [ApiVersionNeutral, ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = AppConstants.Roles.Administrator)]
     [Route("[controller]/[action]")]
-    public class CoursesController : Controller
+    public class ManageCoursesController : Controller
     {
         private readonly ApplicationDbContext db;
 
-        public CoursesController(ApplicationDbContext db)
+        public ManageCoursesController(ApplicationDbContext db)
         {
             this.db = db;
         }

@@ -13,11 +13,11 @@ namespace ResourceServer.Controllers
     [ApiVersionNeutral, ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = AppConstants.Roles.Student)]
     [Route("[controller]/[action]")]
-    public class ClassesController : Controller
+    public class StudentCoursesController : Controller
     {
         private readonly ApplicationDbContext db;
 
-        public ClassesController(ApplicationDbContext db)
+        public StudentCoursesController(ApplicationDbContext db)
         {
             this.db = db;
         }
@@ -50,8 +50,8 @@ namespace ResourceServer.Controllers
                 .Courses
                 .Include(c => c.Subject)
                 .Include(c => c.Teacher)
-                .Include(c => c.Enrollments)
-                .Where(c => c.Enrollments.All(e => e.StudentId != sub) && !subjects.Contains(c.SubjectId))
+                .Include(c => c.EnrolledStudents)
+                .Where(c => c.EnrolledStudents.All(e => e.StudentId != sub) && !subjects.Contains(c.SubjectId))
                 .ToListAsync();
 
             return View(new MyEnrollmentsViewModel
@@ -87,7 +87,7 @@ namespace ResourceServer.Controllers
 
             if (!await db
                 .Courses
-                .Where(c => c.Id == id && c.Enrollments.All(e => e.StudentId != sub) && !subjects.Contains(c.SubjectId))
+                .Where(c => c.Id == id && c.EnrolledStudents.All(e => e.StudentId != sub) && !subjects.Contains(c.SubjectId))
                 .AnyAsync())
             {
                 return RedirectToAction(nameof(Index));

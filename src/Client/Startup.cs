@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Threading.Tasks;
+using Client.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Utils;
 
 namespace Client
 {
@@ -28,6 +33,7 @@ namespace Client
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigureServicesDatabase(services);
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -49,7 +55,7 @@ namespace Client
 
                     options.CallbackPath = "/external/login";
                     options.SignedOutCallbackPath = "/external/logout";
-                    
+
                     // Use the authorization code flow.
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
@@ -59,12 +65,10 @@ namespace Client
                     // the different endpoints URIs or the token validation parameters explicitly.
                     options.Authority = Configuration["AuthServer:BaseUrl"];
 
+                    options.Scope.Add("openid");
                     options.Scope.Add("email");
                     options.Scope.Add("profile");
-
-                    options.Scope.Add("phone");
-                    options.Scope.Add("roles");
-                    options.Scope.Add("values.read");
+                    options.Scope.Add(AppConstants.Scopes.TranscriptRead);
 
                     options.SecurityTokenValidator = new JwtSecurityTokenHandler
                     {
@@ -74,6 +78,13 @@ namespace Client
 
                     options.TokenValidationParameters.NameClaimType = "name";
                     options.TokenValidationParameters.RoleClaimType = "role";
+
+                    options.Events.OnRemoteFailure = context =>
+                    {
+                        context.Response.Redirect("/");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    };
                 });
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -85,6 +96,20 @@ namespace Client
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSingleton<HttpClient>();
+        }
+
+        private void ConfigureServicesDatabase(IServiceCollection services)
+        {
+            var dbPath = Configuration["DB_PATH"];
+            if (string.IsNullOrEmpty(dbPath))
+            {
+                throw new InvalidOperationException("DB_PATH musit be set to a valid path.");
+            }
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlite($"Data Source={dbPath};");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

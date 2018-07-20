@@ -25,7 +25,7 @@
         <td>
           @if (user.Roles.Contains(AppConstants.Roles.Student))
           {
-            <form method="post" asp-area="" asp-controller="Import" asp-action="ImportStudent">
+            <form method="post" asp-area="" asp-controller="ManageUsers" asp-action="ImportStudent">
               <input name="id" type="hidden" value="@user.Subject" />
               <input name="name" type="hidden" value="@user.Email" />
               <button type="submit" class="btn btn-xs btn-primary">Import as Student</button>
@@ -34,7 +34,7 @@
 
           @if (user.Roles.Contains(AppConstants.Roles.Teacher))
           {
-            <form method="post" asp-area="" asp-controller="Import" asp-action="ImportTeacher">
+            <form method="post" asp-area="" asp-controller="ManageUsers" asp-action="ImportTeacher">
               <input name="id" type="hidden" value="@user.Subject" />
               <input name="name" type="hidden" value="@user.Email" />
               <button type="submit" class="btn btn-xs btn-success">Import as Teacher</button>
@@ -45,7 +45,7 @@
     }
   </tbody>
 </table>
-<form method="post" asp-area="" asp-controller="Import" asp-action="ImportAll">
+<form method="post" asp-area="" asp-controller="ManageUsers" asp-action="ImportAll">
   <button type="submit" class="btn btn-warning">Import All</button>
 </form>
 <br />
@@ -66,7 +66,7 @@
         <td>@teacher.Id</td>
         <td>@teacher.Name</td>
         <td>
-          <form method="post" asp-area="" asp-controller="Import" asp-action="DeleteTeacher">
+          <form method="post" asp-area="" asp-controller="ManageUsers" asp-action="DeleteTeacher">
             <input name="id" type="hidden" value="@teacher.Id" />
             <button type="submit" class="btn btn-xs btn-danger">Remove</button>
           </form>
@@ -93,7 +93,7 @@
         <td>@student.Id</td>
         <td>@student.Name</td>
         <td>
-          <form method="post" asp-area="" asp-controller="Import" asp-action="DeleteStudent">
+          <form method="post" asp-area="" asp-controller="ManageUsers" asp-action="DeleteStudent">
             <input name="id" type="hidden" value="@student.Id" />
             <button type="submit" class="btn btn-xs btn-danger">Remove</button>
           </form>

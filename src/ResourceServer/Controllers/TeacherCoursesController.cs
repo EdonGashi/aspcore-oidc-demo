@@ -12,11 +12,11 @@ namespace ResourceServer.Controllers
     [ApiVersionNeutral, ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = AppConstants.Roles.Teacher)]
     [Route("[controller]/[action]")]
-    public class MyCoursesController : Controller
+    public class TeacherCoursesController : Controller
     {
         private readonly ApplicationDbContext db;
 
-        public MyCoursesController(ApplicationDbContext db)
+        public TeacherCoursesController(ApplicationDbContext db)
         {
             this.db = db;
         }
@@ -34,14 +34,14 @@ namespace ResourceServer.Controllers
                 return RedirectToAction("NotRegistered", "Home");
             }
 
-            var courses = await db
+            var classes = await db
                 .Courses
                 .Include(c => c.Subject)
-                .Include(c => c.Enrollments)
+                .Include(c => c.EnrolledStudents)
                 .Where(c => c.TeacherId == sub)
                 .ToListAsync();
 
-            return View(courses);
+            return View(classes);
         }
 
         [HttpGet("{id}")]
@@ -58,20 +58,20 @@ namespace ResourceServer.Controllers
                 return RedirectToAction("NotRegistered", "Home");
             }
 
-            var course = await db
+            var @class = await db
                 .Courses
                 .Include(c => c.Subject)
-                .Include(c => c.Enrollments)
+                .Include(c => c.EnrolledStudents)
                 .ThenInclude(e => e.Student)
                 .Where(c => c.TeacherId == sub && c.Id == id)
                 .SingleOrDefaultAsync();
 
-            if (course == null)
+            if (@class == null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(course);
+            return View(@class);
         }
 
         [HttpPost]

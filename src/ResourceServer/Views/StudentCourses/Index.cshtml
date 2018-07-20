@@ -1,11 +1,11 @@
 ﻿@model ResourceServer.Models.MyEnrollmentsViewModel
 
 @{
-  ViewData["Title"] = "My classes";
+  ViewData["Title"] = "My courses";
 }
 
 <br />
-<h3>Current classes</h3>
+<h3>Current courses</h3>
 <table class="table table-striped">
   <thead>
     <tr>
@@ -31,7 +31,7 @@
 </table>
 
 <br />
-<h3>Available classes</h3>
+<h3>Available courses</h3>
 <table class="table table-striped">
   <thead>
     <tr>
@@ -53,7 +53,7 @@
         <td>@course.Date.Year</td>
         <td>@course.Subject.Ects</td>
         <td>
-          <form method="post" asp-area="" asp-controller="Classes" asp-action="Enroll">
+          <form method="post" asp-area="" asp-controller="StudentCourses" asp-action="Enroll">
             <input name="id" type="hidden" value="@course.Id" />
             <button type="submit" class="btn btn-xs btn-primary">Enroll</button>
           </form>
@@ -64,15 +64,15 @@
 </table>
 
 <br />
-<h3>Completed classes</h3>
+<h3>Completed courses</h3>
 <table class="table table-striped">
   <thead>
     <tr>
       <th>Id</th>
       <th>Subject</th>
       <th>Teacher</th>
-      <th>Year</th>
       <th>ECTS</th>
+      <th>Year</th>
       <th>Grade</th>
     </tr>
   </thead>
@@ -83,8 +83,8 @@
         <td>@enrollment.Id</td>
         <td>@enrollment.Course.Subject.Name</td>
         <td>@enrollment.Course.Teacher.Name</td>
-        <td>@enrollment.Course.Date.Year</td>
         <td>@enrollment.Course.Subject.Ects</td>
+        <td>@enrollment.Course.Date.Year</td>
         <td>@enrollment.Grade</td>
       </tr>
     }

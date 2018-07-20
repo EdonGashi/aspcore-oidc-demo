@@ -1,34 +1,28 @@
-﻿@model string
+﻿@model IEnumerable<Client.Data.ScholarshipApplicant>
 
-<div class="jumbotron">
-  @if (User?.Identity?.IsAuthenticated ?? false) {
-    <h1>Welcome, @User.Identity.Name</h1>
-
-    <p>
-      @foreach (var claim in Context.User.Claims) {
-        <div>@claim.Type: <b>@claim.Value</b></div>
+<div class="well">
+  <h2>Institution name</h2>
+  <h3>Scholarship applicants</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Average grade</th>
+        <th>ECTS</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var applicant in Model)
+      {
+        <tr>
+          <td>@applicant.Name</td>
+          <td>@applicant.AverageGrade</td>
+          <td>@applicant.Ects</td>
+        </tr>
       }
-    </p>
-
-    <p>
-      <div>access_token: <b>@ViewData["access_token"]</b></div>
-      <div>id_token: <b>@ViewData["id_token"]</b></div>
-      <div>refresh_token: <b>@ViewData["refresh_token"]</b></div>
-    </p>
-
-    if (!string.IsNullOrEmpty(Model)) {
-      <h3>Message received from the resource controller: @Model</h3>
-    }
-
-    <form action="~/" method="post">
-      <button class="btn btn-lg btn-warning" type="submit">Query the resource controller</button>
-    </form>
-
-    <a class="btn btn-lg btn-danger" href="/logout">Sign out</a>
-  }
-
-  else {
-    <h1>Welcome, anonymous</h1>
-    <a class="btn btn-lg btn-success" href="/login">Sign in</a>
-  }
+    </tbody>
+  </table>
+  <form method="post" asp-area="" asp-controller="Home" asp-action="InitiateApply">
+    <button type="submit" class="btn btn-success">Apply for scholarship</button>
+  </form>
 </div>

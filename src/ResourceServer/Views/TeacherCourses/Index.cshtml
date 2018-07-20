@@ -27,9 +27,9 @@
         <td>@course.Subject.Name</td>
         <td>@course.Subject.Ects</td>
         <td>@course.Date.Year</td>
-        <td>@course.Enrollments.Count</td>
+        <td>@course.EnrolledStudents.Count</td>
         <td>
-          <a class="btn btn-xs btn-info" asp-area="" asp-controller="MyCourses" asp-action="Details" asp-route-id="@course.Id">View</a>
+          <a class="btn btn-xs btn-info" asp-area="" asp-controller="TeacherCourses" asp-action="Details" asp-route-id="@course.Id">View</a>
         </td>
       </tr>
     }

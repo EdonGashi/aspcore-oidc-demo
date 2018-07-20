@@ -12,7 +12,7 @@ namespace ResourceServer.Data
         [Required]
         public string Name { get; set; }
 
-        public virtual ICollection<Enrollment> Enrollments { get; set; }
+        public virtual ICollection<Enrollment> EnrolledCourses { get; set; }
     }
 
     public class Teacher
@@ -22,7 +22,7 @@ namespace ResourceServer.Data
         [Required]
         public string Name { get; set; }
 
-        public virtual ICollection<Course> Courses { get; set; }
+        public virtual ICollection<Course> CoursesTaught { get; set; }
     }
 
     public class Subject
@@ -56,7 +56,7 @@ namespace ResourceServer.Data
 
         public virtual Subject Subject { get; set; }
 
-        public virtual ICollection<Enrollment> Enrollments { get; set; }
+        public virtual ICollection<Enrollment> EnrolledStudents { get; set; }
     }
 
     public class Enrollment

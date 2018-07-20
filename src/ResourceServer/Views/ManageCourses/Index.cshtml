@@ -29,7 +29,7 @@
       <td>@course.Date.Year</td>
       <td>@course.Subject.Ects</td>
       <td>
-        <form method="post" asp-area="" asp-controller="Courses" asp-action="Delete">
+        <form method="post" asp-area="" asp-controller="ManageCourses" asp-action="Delete">
           <input name="id" type="hidden" value="@course.Id" />
           <button type="submit" class="btn btn-xs btn-danger">Delete</button>
         </form>
@@ -39,4 +39,4 @@
   </tbody>
 </table>
 <br />
-<a class="btn btn-info" asp-area="" asp-controller="Courses" asp-action="Create">Create new</a>
+<a class="btn btn-info" asp-area="" asp-controller="ManageCourses" asp-action="Create">Create new</a>
