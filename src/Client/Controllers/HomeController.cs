@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Utils;
 using Utils.Helpers;
 
 namespace Client.Controllers
@@ -58,6 +59,11 @@ namespace Client.Controllers
         [HttpGet("~/apply")]
         public async Task<IActionResult> Apply()
         {
+            if (!User.IsInRole(AppConstants.Roles.Student))
+            {
+                return RedirectToAction(nameof(InvalidRole));
+            }
+
             var transcript = await GetTranscript(HttpContext.RequestAborted);
             if (transcript == null)
             {
@@ -116,6 +122,13 @@ namespace Client.Controllers
 
             await db.SaveChangesAsync();
             return RedirectToAction(nameof(Success));
+        }
+
+        [HttpGet("~/invalidrole")]
+        public async Task<ActionResult> InvalidRole()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return View();
         }
 
         [HttpGet("~/success")]
