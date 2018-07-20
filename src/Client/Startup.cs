@@ -68,6 +68,7 @@ namespace Client
                     options.Scope.Add("openid");
                     options.Scope.Add("email");
                     options.Scope.Add("profile");
+                    options.Scope.Add("roles");
                     options.Scope.Add(AppConstants.Scopes.TranscriptRead);
 
                     options.SecurityTokenValidator = new JwtSecurityTokenHandler
