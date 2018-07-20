@@ -1,0 +1,37 @@
+﻿@using ResourceServer.Data
+@model IEnumerable<Course>
+
+@{
+  ViewData["Title"] = "Courses";
+}
+
+<br />
+<h2>My Courses</h2>
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Subject</th>
+      <th>ECTS</th>
+      <th>Year</th>
+      <th>Enrolled students</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var course in Model)
+    {
+      <tr>
+        <td>@course.Id</td>
+        <td>@course.Subject.Name</td>
+        <td>@course.Subject.Ects</td>
+        <td>@course.Date.Year</td>
+        <td>@course.Enrollments.Count</td>
+        <td>
+          <a class="btn btn-xs btn-info" asp-area="" asp-controller="MyCourses" asp-action="Details" asp-route-id="@course.Id">View</a>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

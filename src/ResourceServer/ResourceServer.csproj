@@ -25,6 +25,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Views\Home\NotRegistered.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Classes\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\MyCourses\Details.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\MyCourses\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Courses\Create.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

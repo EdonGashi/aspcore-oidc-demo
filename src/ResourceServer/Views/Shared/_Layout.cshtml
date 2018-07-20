@@ -41,6 +41,14 @@
             <li><a asp-area="" asp-controller="Subjects" asp-action="Index">Manage Subjects</a></li>
             <li><a asp-area="" asp-controller="Courses" asp-action="Index">Manage Courses</a></li>
           }
+          @if (User.IsInRole(AppConstants.Roles.Teacher))
+          {
+            <li><a asp-area="" asp-controller="MyCourses" asp-action="Index">My Courses</a></li>
+          }
+          @if (User.IsInRole(AppConstants.Roles.Student))
+          {
+            <li><a asp-area="" asp-controller="Classes" asp-action="Index">My Classes</a></li>
+          }
         </ul>
         <partial name="_LoginPartial" />
       </div>

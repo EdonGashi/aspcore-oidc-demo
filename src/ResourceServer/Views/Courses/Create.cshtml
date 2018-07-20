@@ -6,7 +6,7 @@
 }
 
 <br />
-<h2>Create subject</h2>
+<h2>@ViewData["Title"]</h2>
 <br />
 
 <form method="post" asp-area="" asp-controller="Courses" asp-action="Create">
@@ -15,8 +15,7 @@
     <label asp-for="SubjectId"></label>
     <select asp-for="SubjectId"
             asp-items="@(new SelectList((IEnumerable)ViewData["subjects"], "Id", "Name", Model.SubjectId))"
-            class="form-control">
-    </select>
+            class="form-control"></select>
     <span asp-validation-for="SubjectId" class="text-danger"></span>
   </div>
   <div class="form-group">

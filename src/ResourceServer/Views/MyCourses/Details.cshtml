@@ -1,0 +1,47 @@
+﻿@using ResourceServer.Data
+@model Course
+
+@{
+  var title = Model.Subject.Name + " (" + Model.Date.Year + ")";
+  ViewData["Title"] = title;
+}
+
+<br />
+<h2>@title - @Model.Enrollments.Count students</h2>
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Grade</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var enrollment in Model.Enrollments)
+    {
+      <tr>
+        <td class="align-middle">@enrollment.Student.Name</td>
+        <td class="align-middle">@(enrollment.Grade != null ? enrollment.Grade.ToString() : "Not graded")</td>
+        <td class="align-middle">
+          @if (enrollment.Grade == null)
+          {
+            <form method="post" asp-area="" asp-controller="MyCourses" asp-action="SetGrade">
+              <input name="id" type="hidden" value="@enrollment.Id" />
+              <input type="number" name="grade" class="form-control" style="width: 100px; display: inline;" />
+              <button type="submit" class="btn btn-sm btn-primary">Set grade</button>
+            </form>
+          }
+          else
+          {
+            <form method="post" asp-area="" asp-controller="MyCourses" asp-action="RemoveGrade">
+              <input name="id" type="hidden" value="@enrollment.Id" />
+              <button type="submit" class="btn btn-xs btn-primary">Remove grade</button>
+            </form>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+<br />

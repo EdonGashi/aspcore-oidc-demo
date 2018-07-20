@@ -1,0 +1,95 @@
+﻿@model ResourceServer.Models.MyEnrollmentsViewModel
+
+@{
+  ViewData["Title"] = "My classes";
+}
+
+<br />
+<h3>Current classes</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Subject</th>
+      <th>Teacher</th>
+      <th>Year</th>
+      <th>ECTS</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var enrollment in Model.CurrentCourses)
+    {
+      <tr>
+        <td>@enrollment.Id</td>
+        <td>@enrollment.Course.Subject.Name</td>
+        <td>@enrollment.Course.Teacher.Name</td>
+        <td>@enrollment.Course.Date.Year</td>
+        <td>@enrollment.Course.Subject.Ects</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<br />
+<h3>Available classes</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Subject</th>
+      <th>Teacher</th>
+      <th>Year</th>
+      <th>ECTS</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var course in Model.AvailableCourses)
+    {
+      <tr>
+        <td>@course.Id</td>
+        <td>@course.Subject.Name</td>
+        <td>@course.Teacher.Name</td>
+        <td>@course.Date.Year</td>
+        <td>@course.Subject.Ects</td>
+        <td>
+          <form method="post" asp-area="" asp-controller="Classes" asp-action="Enroll">
+            <input name="id" type="hidden" value="@course.Id" />
+            <button type="submit" class="btn btn-xs btn-primary">Enroll</button>
+          </form>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<br />
+<h3>Completed classes</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Subject</th>
+      <th>Teacher</th>
+      <th>Year</th>
+      <th>ECTS</th>
+      <th>Grade</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var enrollment in Model.CompletedCourses)
+    {
+      <tr>
+        <td>@enrollment.Id</td>
+        <td>@enrollment.Course.Subject.Name</td>
+        <td>@enrollment.Course.Teacher.Name</td>
+        <td>@enrollment.Course.Date.Year</td>
+        <td>@enrollment.Course.Subject.Ects</td>
+        <td>@enrollment.Grade</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<p>Average grade: @Model.CurrentGrade</p>
+<p>Total ECTS: @Model.CurrentEcts</p>

@@ -31,6 +31,11 @@ namespace ResourceServer.Controllers
             return View();
         }
 
+        public IActionResult NotRegistered()
+        {
+            return View();
+        }
+
         public IActionResult Login([FromQuery] string returnUrl)
         {
             if (User.Identity.IsAuthenticated)
