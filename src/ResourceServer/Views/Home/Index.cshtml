@@ -34,6 +34,7 @@
   else
   {
     <h2>You are not signed in.</h2>
+    <br />
     <a class="btn btn-info" href="@PathUtils.Join(Configuration["AuthServer:BaseUrl"], Configuration["AuthServer:RegisterPath"])">Register</a>
     <a class="btn btn-success" asp-area="" asp-controller="Home" asp-action="Login">Sign in</a>
   }
